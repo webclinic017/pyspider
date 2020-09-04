@@ -1,6 +1,7 @@
 from log_config import logger
 import mylib
-logger=logger('myapp')
+logger = logger('myapp')
+
 
 def main():
     logger.debug('Started')
@@ -11,6 +12,7 @@ def main():
     logger.warning('warn message')
     logger.error('error message')
     logger.critical('critical message')
+
 
 if __name__ == '__main__':
     main()
