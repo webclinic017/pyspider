@@ -1,4 +1,4 @@
-from logging import Logger
+from log_config import logger
 import redis
 
 
@@ -6,7 +6,7 @@ class RedisManager:
     """redis连接设置
     """
     def __init__(self):
-        self.logger = Logger
+        self.logger = logger()
 
     def init_client(self, host='localhost', port=None, password=None, db=0):
         try:
@@ -16,6 +16,7 @@ class RedisManager:
                                         password=password,
                                         decode_responses=True)
             client = redis.Redis(connection_pool=pool)
+            self.logger.debug('hello world')
         except Exception as e:
             self.logger.error("connect redis failed,msg={}".format(e))
             return None
@@ -23,3 +24,5 @@ class RedisManager:
 
     def __call__(self):
         return self.init_client()
+
+a=RedisManager()
