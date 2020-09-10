@@ -1,6 +1,7 @@
 import logging
 import logging.handlers
 import os
+import random
 
 import aiohttp
 import redis
@@ -60,7 +61,7 @@ async def get_proxy(self, platform='2808'):
             async with ssesion.request('GET', url) as res:
                 result = await res.json()
     except Exception as e:
-        print(str(e))
+        logger.error(str(e))
         return None
     else:
         proxy = result.get('data')
@@ -92,3 +93,30 @@ def init_redis_client(host='localhost', port=6379, password=None, db=0):
         logger.error("connect redis failed,msg={}".format(e))
         return None
     return client
+
+
+async def get_ua(platform='mobile'):
+    """获取任意ua
+
+    Args:
+        platform (str, optional): Defaults to 'mobile'.
+
+    Returns:
+        [type]: [description]
+    """
+    random_ua_links = [
+        "http://ycrawl.91cyt.com/api/v1/pdd/common/randomIosUa",
+        "http://ycrawl.91cyt.com/api/v1/pdd/common/randomAndroidUa",
+    ]
+    url = random.choice(random_ua_links)
+    if platform == 'web':
+        url = "http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa"
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                res = await resp.json()
+        ua = res['data']
+        return ua
+    except Exception as e:
+        logger.error(str(e))
+        return False
