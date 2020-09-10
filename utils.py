@@ -61,7 +61,7 @@ async def get_proxy(self, platform='2808'):
             async with ssesion.request('GET', url) as res:
                 result = await res.json()
     except Exception as e:
-        logger.error(str(e))
+        logger.exception(str(e))
         return None
     else:
         proxy = result.get('data')
@@ -90,7 +90,7 @@ def init_redis_client(host='localhost', port=6379, password=None, db=0):
                                     decode_responses=True)
         client = redis.Redis(connection_pool=pool)
     except Exception as e:
-        logger.error("connect redis failed,msg={}".format(e))
+        logger.exception("connect redis failed,msg={}".format(e))
         return None
     return client
 
@@ -118,5 +118,5 @@ async def get_ua(platform='mobile'):
         ua = res['data']
         return ua
     except Exception as e:
-        logger.error(str(e))
+        logger.exception(str(e))
         return False
