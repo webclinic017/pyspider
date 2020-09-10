@@ -3,7 +3,7 @@ import aiohttp
 import asyncio
 from aiohttp import TCPConnector
 
-from ..utils import get_logger, get_proxy, get_ua
+from utils import get_logger, get_proxy, get_ua
 
 logger=get_logger('jingxi_category_gather')
 
