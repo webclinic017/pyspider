@@ -5,11 +5,10 @@ from urllib.parse import quote
 import json
 import asyncio
 from aiohttp import TCPConnector
-from worker.spider.jingxi_spider.jingxi_keyword import get_keyword
-from utils.log import write_log
+from utils import get_logger,get_proxy,get_ua
 import re
 
-logger=write_log('jingxi_category_sales')
+logger=get_logger('jingxi_category_sales')
 
 class JingXiSaleCount:
     def __init__(self):
