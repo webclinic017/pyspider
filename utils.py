@@ -43,7 +43,7 @@ def get_logger(file_name):
 logger = get_logger('utils')
 
 
-async def get_proxy(self, platform='2808'):
+async def get_proxy(session, platform='2808'):
     """获取代理
 
     Args:
@@ -95,7 +95,7 @@ def init_redis_client(host='localhost', port=6379, password=None, db=0):
     return client
 
 
-async def get_ua(platform='mobile'):
+async def get_ua(session, platform='mobile'):
     """获取任意ua
 
     Args:
@@ -112,9 +112,8 @@ async def get_ua(platform='mobile'):
     if platform == 'web':
         url = "http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa"
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                res = await resp.json()
+        async with session.get(url) as resp:
+            res = await resp.json()
         ua = res['data']
         return ua
     except Exception as e:
