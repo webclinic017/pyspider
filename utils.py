@@ -16,7 +16,7 @@ def get_logger(file_name):
     Returns:
         [obj]: [logger对象]
     """
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger(file_name)
     if not file_name.endswith('.log'):
         file_name = file_name + '.log'
     logger.setLevel(logging.DEBUG)
@@ -38,9 +38,6 @@ def get_logger(file_name):
     handler.setLevel(logging.DEBUG)
     logger.addHandler(handler)
     return logger
-
-
-logger = get_logger('utils')
 
 
 async def get_proxy(session, platform='2808'):
@@ -91,7 +88,7 @@ def init_redis_client(host='localhost', port=6379, password=None, db=0):
                                     decode_responses=True)
         client = redis.Redis(connection_pool=pool)
     except Exception as e:
-        logger.exception("connect redis failed,msg={}".format(e))
+        print(e)
         return None
     return client
 
@@ -118,5 +115,5 @@ async def get_ua(session, platform='mobile'):
         ua = res['data']
         return ua
     except Exception as e:
-        logger.exception(str(e))
+        print(e)
         return False

@@ -5,7 +5,10 @@ from urllib.parse import quote
 import json
 import asyncio
 from aiohttp import TCPConnector
-from utils import get_logger,get_proxy,get_ua
+import sys
+sys.path.append('../')
+from spider.utils import get_logger,get_proxy,get_ua
+from spider.jingxi_spider.jingxi_category_gather import get_keyword
 import re
 
 logger=get_logger('jingxi_category_sales')
@@ -29,51 +32,16 @@ class JingXiSaleCount:
             'accept-language': 'zh-CN,zh;q=0.9',
             #'cookie': 'shshshfpa=b297da84-9482-79d1-540f-b706c2f3329c-1597804873; shshshfpb=tBKQSuSPRxUj0E1tVh%2F2BeA%3D%3D; __jdu=15978048731901886129247; unpl=V2_ZzNtbUUAQBImX0AEfBEMA2JQGlkRAxEVc10TXX4eXVEwC0VVclRCFnQUR11nG1wUZwsZXkBcRxdFCEdkeBBVAWMDE1VGZxBFLV0CFSNGF1wjU00zQwBBQHcJFF0uSgwDYgcaDhFTQEJ2XBVQL0oMDDdRFAhyZ0AVRQhHZHsdVANuAhdURFVDHXQIT118GV8NZAYUbXJQcyVFC0BUch1aNWYzE20AAx8XcAhOUX9UXAFvBRtcR15FF3UAR1RyEFsFZAsRWERnQiV2; __jdv=76161171|baidu-pinzhuan|t_288551095_baidupinzhuan|cpc|0f3d30c8dba7459bb52f2eb5eba8ac7d_0_6f26bf7a69a74b95bec17dd8460ef9f9|1598873033636; areaId=19; ipLoc-djd=19-1607-3155-0; PCSYCityID=CN_440000_440300_440305; webp=1; mba_muid=15978048731901886129247; visitkey=58461455754517973; sc_width=375; wxmall_ptype=2; 3AB9D23F7A4B3C9B=3NDYHUGMNLTS2Y6BVPPMZFTFHQ2H5UMZYINL52XG7UFG6GPULHNMI2YL4UYVGEKU6OWXEYONZ2PQZZLPYUY4IWDOYU; TrackerID=3QJmKLoBFRqXqTzV0jXvceuP4wE7k1LSDbSGmQ08Ltv9qPwjWaIk7Ck2frUjFyOmFxOT8J0Ua08Bd-Wem5_1lNt0EbvD8s0sTtqvAmrZ3wFwukUU1E5b3OZSVcdHwfgfPI2UxKDHVxTdw7MNqRYBkg; cartLastOpTime=1598929270; kplTitleShow=1; cartNum=0; wxa_level=1; __jdc=76161171; wq_area=19_1607_0%7C3; retina=1; cid=9; jxsid=15990271109725345238; __jda=76161171.15978048731901886129247.1597804873.1599020762.1599027111.27; PPRD_P=UUID.15978048731901886129247-CT.138631.1.3; shshshfp=fe0aad28250e96b22aebb3320c745a1f; wqmnx1=MDEyNjM1MGg6Lm9hc2h5JURBJl8xMmZ0cnMsb3lvaV9kc3YmcGZfZT1lZHcmMTFkbCZjJTdCJjU3NXM1Nzc1NzY3N29hIHVuZC5pMkIvLjE0cGI1NlRsRylvNDEzYlNpLjlmN24yNDJZT09VIUgl; __wga=1599027115094.1599027111317.1598932266958.1598873053720.2.5; jxsid_s_t=1599027115145; jxsid_s_u=https%3A//wq.jd.com/search/searchn; __jdb=76161171.2.15978048731901886129247|27.1599027111; mba_sid=15990271112131258703377078298.2; shshshsID=caabd90d67dfe387c255b6c770471922_2_1599027115421'
         }
-        ua = await self.get_random_ua(session)
+        ua = await get_ua(session)
         if ua:
             headers['user-agent'] = ua
         return headers
-
-    
-    async def get_random_ua(self, session):
-        random_ua_links = [
-            "http://ycrawl.91cyt.com/api/v1/pdd/common/randomIosUa",
-            #"http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa",
-            "http://ycrawl.91cyt.com/api/v1/pdd/common/randomAndroidUa",
-        ]
-        url = random.choice(random_ua_links)
-        try:
-            async with session.get(url) as resp:
-                res = await resp.json()
-            ua = res['data']
-            return ua
-        except Exception as e:
-            print(str(e))
-            # logger.error(str(e))
-            return False
-
-    async def get_proxy(self, session):
-        links = [
-                #'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform=dubsix&wantType=1',
-               'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform=2808&wantType=1'
-              ]
-        url = random.choice(links)
-        try:
-            async with session.get(url) as resp:
-                res = await resp.json()
-            ip = 'http://'+res['data']
-            return ip
-        except Exception as e:
-            print(str(e))
-            # logger.error(str(e))
-            return None
 
 
     async def get_sales(self, sku_id, session):
         url = "https://m.jingxi.com/pingou_api/GetBatTuanNum?skuids={}&sceneval=2".format(
             sku_id)
-        proxy = 'http://2020061500002101216:cXr5v1Tm1MzF4RHK@forward.apeyun.com:9082'
-        # proxy = await self.get_proxy(session)
+        proxy = await get_proxy(session)
         if not proxy:
             return {'msg':"can't get proxy!"}
         for i in range(2):
@@ -90,8 +58,8 @@ class JingXiSaleCount:
                     # sale_count = res[sku_id][0].get('tuancount',0)
                 # print(res)
             except Exception as e:
-                print(e)
-                # logger.error(str(e))
+                # print(e)
+                logger.exception(str(e))
             else:
                 for item in list(res.values()):
                     if type(item)==list:
@@ -124,7 +92,7 @@ class JingXiSaleCount:
                 response = json.loads(response)
                 contents = response['data']['searchm']['Paragraph']
             except Exception as e:
-                print(e)
+                logger.exception(str(e))
                 # logger.error(str(e))
             else:
                 if contents:
@@ -162,7 +130,7 @@ class JingXiSaleCount:
         page=10
         await self.download_many(keyword,page)
         self.data['cat3'] = keyword
-        keyword_list = get_keyword()
+        keyword_list = await get_keyword()
         for item in keyword_list:
             if keyword in item.values():
                 self.data['cat1']=item['cat1']
