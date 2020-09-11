@@ -6,8 +6,8 @@ import asyncio
 from aiohttp import TCPConnector
 import sys
 sys.path.append('../')
-from spider.utils import get_logger,get_proxy,get_ua
-from spider.jingxi_spider.jingxi_category_gather import get_keyword
+from utils import get_logger,get_proxy,get_ua
+from jingxi_spider.jingxi_category_gather import get_keyword
 import re
 
 logger=get_logger('jingxi_category_sales')

@@ -3,7 +3,6 @@ import logging.handlers
 import os
 import random
 
-import aiohttp
 import redis
 
 
@@ -54,9 +53,8 @@ async def get_proxy(session, platform='zhilian'):
     url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
         platform)
     try:
-        async with aiohttp.ClientSession() as ssesion:
-            async with ssesion.request('GET', url) as res:
-                result = await res.json()
+        async with session.request('GET', url) as res:
+            result = await res.json()
     except Exception as e:
         # logger.exception(str(e))
         print(e)
