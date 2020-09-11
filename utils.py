@@ -40,11 +40,11 @@ def get_logger(file_name):
     return logger
 
 
-async def get_proxy(session, platform='2808'):
+async def get_proxy(session, platform='zhilian'):
     """获取代理
 
     Args:
-        platform (str, optional): [使用的代理平台]. Defaults to '2808'.
+        platform (str, optional): [使用的代理平台]. Defaults to 'zhilian'.
 
     Returns:
         [str]: [proxy]

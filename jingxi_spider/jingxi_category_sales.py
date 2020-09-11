@@ -1,6 +1,5 @@
 import aiohttp
 # import requests
-import random
 from urllib.parse import quote
 import json
 import asyncio
