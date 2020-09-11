@@ -49,17 +49,19 @@ async def get_category(session):
         cat2_id=item['id']
         params = make_params(cat2_id=cat2_id)
         headers = await make_headers(session)
-        proxies = {'http': proxy}
+        # proxies = {'http': proxy}
         for i in range(3):
             try:
-                result = requests.post(url, headers=headers, proxies=proxies, data=json.dumps(params), timeout=3).json()
+                # result = requests.post(url, headers=headers, proxies=proxies, data=json.dumps(params), timeout=3).json()
+                async with session.post(url, headers=headers, proxy=proxy, data=json.dumps(params), timeout=3) as res:
+                    result=await res.json()
             except Exception as e:
                 print(e)
             else:
                 cat3_list = result.get('data').get('catList3')
                 print(cat3_list)
                 if cat3_list:
-                    cat_list.extend(cat3_list)
+                    cat_list.extend(list(cat3_list))
                 break
     with open('data.py', 'at',encoding='utf-8') as fp:
         fp.write(str(cat_list))
