@@ -123,7 +123,8 @@ async def start_request(session,
                         headers=None,
                         proxy=None,
                         data=None,
-                        timeout=3):
+                        timeout=3,
+                        return_type='json'):
     """发起通用请求，返回response
 
     Args:
@@ -149,4 +150,7 @@ async def start_request(session,
     except Exception as e:
         print(e)
     else:
-        return res
+        if return_type == 'json':
+            return res.json()
+        else:
+            return res.text()
