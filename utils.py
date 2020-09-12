@@ -115,3 +115,38 @@ async def get_ua(session, platform='mobile'):
     except Exception as e:
         print(e)
         return False
+
+
+async def start_request(session,
+                        url,
+                        method='GET',
+                        headers=None,
+                        proxy=None,
+                        data=None,
+                        timeout=3):
+    """发起通用请求，返回response
+
+    Args:
+        session ([type]): [description]
+        url ([type]): [description]
+        method (str, optional): [description]. Defaults to 'GET'.
+        headers ([type], optional): [description]. Defaults to None.
+        proxy ([type], optional): [description]. Defaults to None.
+        data ([type], optional): [description]. Defaults to None.
+        timeout (int, optional): [description]. Defaults to 3.
+
+    Returns:
+        [type]: [description]
+    """
+    try:
+        async with session.request(method,
+                                   url,
+                                   headers=headers,
+                                   proxy=proxy,
+                                   data=data,
+                                   timeout=3) as resp:
+            res = await resp
+    except Exception as e:
+        print(e)
+    else:
+        return res
