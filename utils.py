@@ -2,6 +2,7 @@ import logging
 import logging.handlers
 import os
 import random
+import json
 
 import redis
 
@@ -146,11 +147,11 @@ async def start_request(session,
                                    proxy=proxy,
                                    data=data,
                                    timeout=3) as resp:
-            res = await resp
+            res = await resp.text()
     except Exception as e:
         print(e)
     else:
         if return_type == 'json':
-            return res.json()
+            return json.loads(res)
         else:
-            return res.text()
+            return res
