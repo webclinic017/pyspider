@@ -40,19 +40,19 @@ def get_logger(file_name):
     return logger
 
 
-async def get_proxy(session, platform='zhilian'):
+async def get_proxy(session, proxy_type='zhilian'):
     """获取代理
 
     Args:
-        platform (str, optional): [使用的代理平台]. Defaults to 'zhilian'.
+        proxy_type (str, optional): [使用的代理平台]. Defaults to 'zhilian'.
 
     Returns:
         [str]: [proxy]
     """
-    if platform == 'zhilian':
+    if proxy_type == 'zhilian':
         return 'http://2020061500002101216:cXr5v1Tm1MzF4RHK@forward.apeyun.com:9082'
     url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
-        platform)
+        proxy_type)
     try:
         async with session.request('GET', url) as res:
             result = await res.json()
@@ -92,11 +92,11 @@ def init_redis_client(host='localhost', port=6379, password=None, db=0):
     return client
 
 
-async def get_ua(session, platform='mobile'):
+async def get_ua(session, ua_type='mobile'):
     """获取任意ua
 
     Args:
-        platform (str, optional): Defaults to 'mobile'.
+        ua_type (str, optional): Defaults to 'mobile'.
 
     Returns:
         [type]: [description]
@@ -106,7 +106,7 @@ async def get_ua(session, platform='mobile'):
         "http://ycrawl.91cyt.com/api/v1/pdd/common/randomAndroidUa",
     ]
     url = random.choice(random_ua_links)
-    if platform == 'web':
+    if ua_type == 'web':
         url = "http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa"
     try:
         async with session.get(url) as resp:
@@ -146,7 +146,7 @@ async def start_request(session,
                                    headers=headers,
                                    proxy=proxy,
                                    data=data,
-                                   timeout=3) as resp:
+                                   timeout=timeout) as resp:
             res = await resp.text()
     except Exception as e:
         print(e)
@@ -155,3 +155,30 @@ async def start_request(session,
             return json.loads(res)
         else:
             return res
+
+
+async def common_request(session,
+                         url,
+                         method='GET',
+                         headers=None,
+                         data=None,
+                         proxy_type='zhilian',
+                         ua_type='mobile',
+                         return_type='json'):
+    proxy = await get_proxy(session, proxy_type=proxy_type)
+    ua = await get_ua(session, ua_type=ua_type)
+    if ua:
+        headers['user-agent'] = ua
+    else:
+        logging.warning("can't get avalible random ua,will use the defult!")
+    if proxy:
+        res = await start_request(session,
+                                  url,
+                                  method=method,
+                                  headers=headers,
+                                  proxy=proxy,
+                                  data=data,
+                                  return_type=return_type)
+        return res
+    else:
+        raise Exception("can't get proxy!")
