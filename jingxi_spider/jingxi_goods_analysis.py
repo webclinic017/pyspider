@@ -86,7 +86,7 @@ async def get_commentcount(session, sku_id):
 
 async def main(sku_id):
     async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(
-            ssl=False)) as session:
+            ssl=False),trust_env=True) as session:
         page_data = await get_page_data(session, sku_id)
         sale_count = await get_tuancount(session, sku_id)
         comment_count = await get_commentcount(session, sku_id)
