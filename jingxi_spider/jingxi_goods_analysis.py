@@ -61,21 +61,30 @@ async def get_tuancount(session, sku_id):
 
 
 async def get_commentcount(session, sku_id):
-    url = f'https://m.jingxi.com/commodity/comment/getcommentlist?pagesize=10&sku={sku_id}&page=1'
+    url = f'https://m.jingxi.com/commodity/comment/getcommentlist?version=v2&pagesize=10&score=0&sku={sku_id}&sorttype=5&page=1&t=0.17104595157127211&sceneval=2'
+    comment_headers = {
+        'authority': 'm.jingxi.com',
+        'user-agent':
+        'Mozilla/5.0 (Linux; Android 8.0.0; Pixel 2 XL Build/OPD1.170816.004) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Mobile Safari/537.36',
+        'accept': '*/*',
+        'sec-fetch-site': 'same-origin',
+        'sec-fetch-mode': 'no-cors',
+        'sec-fetch-dest': 'script',
+        'referer': f'https://m.jingxi.com/item/view?sku={sku_id}',
+        'accept-language': 'zh-CN,zh;q=0.9'
+    }
     for i in range(2):
         try:
             proxy = await get_proxy(session)
             headers = await make_headers(session)
+            comment_headers.update(headers)
             res = await start_request(session,
                                       url,
-                                      headers=headers,
+                                      headers=comment_headers,
                                       proxy=proxy,
                                       return_type='text')
-            with open('data.txt', 'wt', encoding='utf-8') as fp:
-                fp.write(res)
-            # print(res)
-            # res = await res.text()
-            # res = json.loads(res)
+            res = res[10:-2]
+            res = json.loads(res)
             comment_count = res['result']['productCommentSummary'][
                 'CommentCount']
         except Exception as e:
@@ -85,8 +94,8 @@ async def get_commentcount(session, sku_id):
 
 
 async def main(sku_id):
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(
-            ssl=False),trust_env=True) as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False),
+                                     trust_env=True) as session:
         page_data = await get_page_data(session, sku_id)
         sale_count = await get_tuancount(session, sku_id)
         comment_count = await get_commentcount(session, sku_id)
@@ -96,6 +105,6 @@ async def main(sku_id):
 
 
 if __name__ == "__main__":
-    sku_id = '70286706553'
+    sku_id = '72372855972'
     data = asyncio.run(main(sku_id))
     print(data)
