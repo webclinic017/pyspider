@@ -30,8 +30,8 @@ async def get_page_data(session, sku_id):
     bs = BeautifulSoup(res, 'lxml')
     origin_price = bs.find('div', {
         'id': 'orginBuyBtn'
-    }).span.get_text().strip()
-    tuan_price = bs.find('div', {'id': 'tuanBtn'}).strong.get_text().strip()
+    }).span.get_text().strip()[1:]
+    tuan_price = bs.find('div', {'id': 'tuanBtn'}).strong.get_text().strip()[1:]
     item_name = bs.find('div', {'id': 'itemName'}).get_text().strip()
     page_data = {
         'single_price': origin_price,
