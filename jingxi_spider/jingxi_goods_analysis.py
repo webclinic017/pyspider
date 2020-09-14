@@ -27,18 +27,22 @@ async def get_page_data(session, sku_id):
                               proxy=proxy,
                               return_type='text')
     # print(res)
-    bs = BeautifulSoup(res, 'lxml')
-    origin_price = bs.find('div', {
-        'id': 'orginBuyBtn'
-    }).span.get_text().strip()[1:]
-    tuan_price = bs.find('div', {'id': 'tuanBtn'}).strong.get_text().strip()[1:]
-    item_name = bs.find('div', {'id': 'itemName'}).get_text().strip()
-    page_data = {
-        'single_price': origin_price,
-        'tuan_price': tuan_price,
-        'item_name': item_name
-    }
-    return page_data
+    try:
+        bs = BeautifulSoup(res, 'lxml')
+        origin_price = bs.find('div', {
+            'id': 'orginBuyBtn'
+        }).span.get_text().strip()[1:]
+        tuan_price = bs.find('div', {'id': 'tuanBtn'}).strong.get_text().strip()[1:]
+        item_name = bs.find('div', {'id': 'itemName'}).get_text().strip()
+    except Exception as e:
+        print(e)
+    else:
+        page_data = {
+            'single_price': origin_price,
+            'tuan_price': tuan_price,
+            'item_name': item_name
+        }
+        return page_data
 
 
 async def get_tuancount(session, sku_id):
@@ -105,6 +109,6 @@ async def main(sku_id):
 
 
 if __name__ == "__main__":
-    sku_id = '72372855972'
+    sku_id = '4734743'
     data = asyncio.run(main(sku_id))
     print(data)
