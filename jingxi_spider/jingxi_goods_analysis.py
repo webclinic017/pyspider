@@ -109,6 +109,6 @@ async def main(sku_id):
 
 
 if __name__ == "__main__":
-    sku_id = '4734743'
+    sku_id = '65226843305'
     data = asyncio.run(main(sku_id))
     print(data)
