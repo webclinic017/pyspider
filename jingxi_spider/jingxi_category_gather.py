@@ -3,7 +3,9 @@ import aiohttp
 import asyncio
 from aiohttp import TCPConnector
 import sys
-sys.path.append('../')
+import os
+sys.path.append(os.path.abspath('.'))
+
 
 from utils import get_logger, get_proxy, get_ua
 
