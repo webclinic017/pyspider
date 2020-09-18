@@ -11,10 +11,9 @@ sys.path.append(os.path.abspath('.'))
 
 from utils import common_request, get_logger
 
-
 logger = get_logger('pdd_billboard_id')
 tab2_id = set()
-content_id=set()
+content_id = set()
 
 headers = {
     'authority': 'mobile.yangkeduo.com',
@@ -72,18 +71,22 @@ async def get_tab2_id(tab_id, session):
                     tab2_id.add(tab_id)
                 break
 
-async def get_tab2_id_set(session):
-    tab1_set=get_tab1_id()
-    await asyncio.gather(*[asyncio.create_task(get_tab2_id(tab_id, session)) for tab_id in tab1_set])
-    
 
-async def start_request(tab,session):
+async def get_tab2_id_set(session):
+    tab1_set = get_tab1_id()
+    await asyncio.gather(*[
+        asyncio.create_task(get_tab2_id(tab_id, session))
+        for tab_id in tab1_set
+    ])
+
+
+async def start_request(tab, session):
     page = 1
     while True:
         url = 'https://mobile.yangkeduo.com/proxy/api/api/george/content/query_content_list?pdduid=0&is_back=1&size=20&resource_type=1&tab_id={}&page={}&obj_count=2&type=1'
         url = url.format(tab, page)
         try:
-            res = await common_request(session,url,headers=headers)
+            res = await common_request(session, url, headers=headers)
             items = res['result']['list']
         except Exception as e:
             logger.exception(str(e))
@@ -100,13 +103,19 @@ async def start_request(tab,session):
         if page > 100:
             break
 
+
 async def main():
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False,limit=50)) as session:
+    async with aiohttp.ClientSession(
+            connector=aiohttp.TCPConnector(ssl=False, limit=50)) as session:
         await get_tab2_id_set(session)
         print(len(tab2_id))
-        await asyncio.gather(*[asyncio.create_task(start_request(tab, session)) for tab in list(tab2_id)[:]])
+        await asyncio.gather(*[
+            asyncio.create_task(start_request(tab, session))
+            for tab in list(tab2_id)[:]
+        ])
     with open('billboard_id.py', 'wt', encoding='utf-8') as fp:
         fp.write('billboard_id=' + str(content_id))
-        
+
+
 if __name__ == "__main__":
     asyncio.run(main())
