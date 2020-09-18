@@ -150,7 +150,7 @@ async def start_request(session,
                                    timeout=timeout) as resp:
             res = await resp.text()
     except Exception as e:
-        print(e)
+        logging.error(e)
     else:
         if return_type == 'json':
             return json.loads(res)
