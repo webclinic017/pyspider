@@ -3,6 +3,7 @@ import logging.handlers
 import os
 import random
 import json
+import asyncio
 
 import redis
 
@@ -164,7 +165,26 @@ async def common_request(session,
                          data=None,
                          proxy_type='zhilian',
                          ua_type='mobile',
-                         return_type='json'):
+                         return_type='json',
+                         timeout=3):
+    """[summary]
+
+    Args:
+        session ([type]): [description]
+        url ([type]): [description]
+        method (str, optional): [description]. Defaults to 'GET'.
+        headers ([type], optional): [description]. Defaults to None.
+        data ([type], optional): [description]. Defaults to None.
+        proxy_type (str, optional): [description]. Defaults to 'zhilian'.
+        ua_type (str, optional): [description]. Defaults to 'mobile'.
+        return_type (str, optional): [description]. Defaults to 'json'.
+
+    Raises:
+        Exception: [description]
+
+    Returns:
+        [type]: [description]
+    """
     proxy = await get_proxy(session, proxy_type=proxy_type)
     ua = await get_ua(session, ua_type=ua_type)
     if ua:
@@ -178,7 +198,8 @@ async def common_request(session,
                                   headers=headers,
                                   proxy=proxy,
                                   data=data,
-                                  return_type=return_type)
+                                  return_type=return_type,
+                                  timeout=timeout)
         return res
     else:
         raise Exception("can't get proxy!")
