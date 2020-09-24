@@ -3,9 +3,10 @@ import json
 import asyncio
 import re
 from bs4 import BeautifulSoup
-# from utils.log import write_log
+
 import sys
-sys.path.append('../')
+import os
+sys.path.append(os.pardir)
 
 from utils import get_proxy, get_ua, start_request, get_logger
 
