@@ -6,7 +6,8 @@ import sys
 sys.path.append('../')
 
 from utils import get_proxy, get_ua
-from jingdong_union.data import cat1_list,cat2_list
+from jingdong_union.data import cat1_list, cat2_list
+
 
 async def make_headers(session):
     headers = {
@@ -29,7 +30,7 @@ async def make_headers(session):
     return headers
 
 
-def make_params(page=1,cat1_id=None,cat2_id=None,cat3_id=None):
+def make_params(page=1, cat1_id=None, cat2_id=None, cat3_id=None):
     params = {
         "pageNo": page,
         "pageSize": 60,
@@ -41,20 +42,24 @@ def make_params(page=1,cat1_id=None,cat2_id=None,cat3_id=None):
     }
     return params
 
+
 async def get_category(session):
-    cat_list=[]
+    cat_list = []
     url = 'https://union.jd.com/api/goods/search'
     proxy = await get_proxy(session)
     for item in cat2_list:
-        cat2_id=item['id']
+        cat2_id = item['id']
         params = make_params(cat2_id=cat2_id)
         headers = await make_headers(session)
         # proxies = {'http': proxy}
         for i in range(3):
             try:
-                # result = requests.post(url, headers=headers, proxies=proxies, data=json.dumps(params), timeout=3).json()
-                async with session.post(url, headers=headers, proxy=proxy, data=json.dumps(params), timeout=3) as res:
-                    result=await res.json()
+                async with session.post(url,
+                                        headers=headers,
+                                        proxy=proxy,
+                                        data=json.dumps(params),
+                                        timeout=3) as res:
+                    result = await res.json()
             except Exception as e:
                 print(e)
             else:
@@ -63,15 +68,17 @@ async def get_category(session):
                 if cat3_list:
                     cat_list.extend(list(cat3_list))
                 break
-    with open('data.py', 'at',encoding='utf-8') as fp:
+    with open('data.py', 'at', encoding='utf-8') as fp:
         fp.write(str(cat_list))
-        
+
         print(cat_list)
         # data=json.loads(data)
     # print(data)
 
+
 async def main():
-    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(
+            ssl=False)) as session:
         await get_category(session)
 
 
