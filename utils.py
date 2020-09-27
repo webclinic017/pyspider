@@ -1,10 +1,15 @@
+import json
 import logging
 import logging.handlers
 import os
 import random
-import json
 
 import redis
+from tenacity import retry, wait
+from tenacity.stop import stop_after_attempt
+from tenacity.wait import wait_random
+
+RETRY_TIME = 3
 
 
 def get_logger(file_name):
@@ -118,6 +123,7 @@ async def get_ua(session, ua_type='mobile'):
         return False
 
 
+@retry(stop=stop_after_attempt(RETRY_TIME), wait=wait_random(min=1, max=2))
 async def start_request(session,
                         url,
                         method='GET',
