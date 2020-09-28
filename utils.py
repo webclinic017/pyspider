@@ -5,7 +5,7 @@ import os
 import random
 
 import redis
-from tenacity import retry, wait
+from tenacity import retry
 from tenacity.stop import stop_after_attempt
 from tenacity.wait import wait_random
 
