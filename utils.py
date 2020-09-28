@@ -4,12 +4,14 @@ import logging.handlers
 import os
 import random
 
+import pybreaker
 import redis
 from tenacity import retry
 from tenacity.stop import stop_after_attempt
 from tenacity.wait import wait_random
 
 RETRY_TIME = 3
+breaker = pybreaker.CircuitBreaker(fail_max=10)
 
 
 def get_logger(file_name):
@@ -123,6 +125,7 @@ async def get_ua(session, ua_type='mobile'):
         return False
 
 
+@breaker
 @retry(stop=stop_after_attempt(RETRY_TIME), wait=wait_random(min=1, max=2))
 async def start_request(session,
                         url,
