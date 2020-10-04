@@ -64,8 +64,7 @@ async def get_proxy(session, proxy_type='zhilian'):
         async with session.request('GET', url) as res:
             result = await res.json()
     except Exception as e:
-        # logger.exception(str(e))
-        print(e)
+        logging.error(e)
         return None
     else:
         proxy = result.get('data')
