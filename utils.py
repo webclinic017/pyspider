@@ -56,6 +56,7 @@ async def get_proxy(session, proxy_type='zhilian'):
     Returns:
         [str]: [proxy]
     """
+    assert proxy_type in {'zhilian', '2808', 'dubsix'}
     if proxy_type == 'zhilian':
         return 'http://2020061500002101216:cXr5v1Tm1MzF4RHK@forward.apeyun.com:9082'
     url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
