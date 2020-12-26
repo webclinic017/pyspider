@@ -6,9 +6,9 @@ import random
 
 import pybreaker
 import redis
-from tenacity import retry
-from tenacity.stop import stop_after_attempt
-from tenacity.wait import wait_random
+# from tenacity import retry
+# from tenacity.stop import stop_after_attempt
+# from tenacity.wait import wait_random
 
 RETRY_TIME = 3
 breaker = pybreaker.CircuitBreaker(fail_max=10)
@@ -117,8 +117,6 @@ class BasicSpider:
             if proxy:
                 return 'http://' + proxy
 
-    @breaker
-    @retry(stop=stop_after_attempt(RETRY_TIME), wait=wait_random(min=0, max=1))
     async def _crawler(self,
                        url,
                        method='GET',
