@@ -47,33 +47,6 @@ def get_logger(file_name):
     return logger
 
 
-async def get_proxy(session, proxy_type='zhilian'):
-    """获取代理
-
-    Args:
-        proxy_type (str, optional): [使用的代理平台]. Defaults to 'zhilian'.
-
-    Returns:
-        [str]: [proxy]
-    """
-    assert proxy_type in {'zhilian', '2808', 'dubsix'}
-    if proxy_type == 'zhilian':
-        return 'http://2020061500002101216:cXr5v1Tm1MzF4RHK@forward.apeyun.com:9082'
-    url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
-        proxy_type)
-    try:
-        async with session.request('GET', url) as res:
-            result = await res.json()
-    except Exception as e:
-        logging.error(e)
-        return None
-    else:
-        proxy = result.get('data')
-        if proxy:
-            return 'http://' + proxy
-        return None
-
-
 def init_redis_client(host='localhost', port=6379, password=None, db=0):
     """连接redis
 
@@ -99,115 +72,101 @@ def init_redis_client(host='localhost', port=6379, password=None, db=0):
     return client
 
 
-async def get_ua(session, ua_type='mobile'):
-    """获取任意ua
+class BasicSpider:
+    def __init__(self, session, retry_time=3) -> None:
+        self.session = session
+        self.retry_time = retry_time
 
-    Args:
-        ua_type (str, optional): Defaults to 'mobile'.
+    async def get_ua(self, ua_type="mobile"):
+        random_ua_links = [
+            "http://ycrawl.91cyt.com/api/v1/pdd/common/randomIosUa",
+            "http://ycrawl.91cyt.com/api/v1/pdd/common/randomAndroidUa",
+        ]
+        url = random.choice(random_ua_links)
+        if ua_type == 'web':
+            url = "http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa"
+        try:
+            async with self.session.get(url) as resp:
+                res = await resp.json()
+            ua = res['data']
+            return ua
+        except Exception as e:
+            logging.error(f"获取ua出错：{e}")
 
-    Returns:
-        [type]: [description]
-    """
-    random_ua_links = [
-        "http://ycrawl.91cyt.com/api/v1/pdd/common/randomIosUa",
-        "http://ycrawl.91cyt.com/api/v1/pdd/common/randomAndroidUa",
-    ]
-    url = random.choice(random_ua_links)
-    if ua_type == 'web':
-        url = "http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa"
-    try:
-        async with session.get(url) as resp:
-            res = await resp.json()
-        ua = res['data']
-        return ua
-    except Exception as e:
-        print(e)
-        return False
+    async def get_proxy(self, proxy_type='pinzan'):
+        """获取代理
 
+        Args:
+            proxy_type (str, optional): [使用的代理平台]. Defaults to 'pinzan'.
 
-@breaker
-@retry(stop=stop_after_attempt(RETRY_TIME), wait=wait_random(min=1, max=2))
-async def start_request(session,
-                        url,
-                        method='GET',
-                        headers=None,
-                        proxy=None,
-                        data=None,
-                        timeout=3,
-                        return_type='json'):
-    """发起通用请求，返回response
-
-    Args:
-        session ([type]): [description]
-        url ([type]): [description]
-        method (str, optional): [description]. Defaults to 'GET'.
-        headers ([type], optional): [description]. Defaults to None.
-        proxy ([type], optional): [description]. Defaults to None.
-        data ([type], optional): [description]. Defaults to None.
-        timeout (int, optional): [description]. Defaults to 3.
-
-    Returns:
-        [type]: [description]
-    """
-    try:
-        async with session.request(method,
-                                   url,
-                                   headers=headers,
-                                   proxy=proxy,
-                                   data=data,
-                                   timeout=timeout) as resp:
-            res = await resp.text()
-    except Exception as e:
-        logging.error(e)
-    else:
-        if return_type == 'json':
-            return json.loads(res)
+        Returns:
+            [str]: [proxy]
+        """
+        assert proxy_type in {'zhilian', '2808', 'dubsix', 'liebao'}
+        if proxy_type == 'zhilian':
+            return 'http://2020061500002101216:cXr5v1Tm1MzF4RHK@forward.apeyun.com:9082'
+        url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
+            proxy_type)
+        try:
+            async with self.session.request('GET', url) as res:
+                result = await res.json()
+        except Exception as e:
+            logging.error(e)
         else:
+            proxy = result.get('data')
+            if proxy:
+                return 'http://' + proxy
+
+    @breaker
+    @retry(stop=stop_after_attempt(RETRY_TIME), wait=wait_random(min=0, max=1))
+    async def _crawler(self,
+                       url,
+                       method='GET',
+                       headers=None,
+                       proxy=None,
+                       data=None,
+                       timeout=5,
+                       return_type='json'):
+        for _ in range(self.retry_time - 1):
+            try:
+                async with self.session.request(method,
+                                                url,
+                                                headers=headers,
+                                                proxy=proxy,
+                                                data=data,
+                                                timeout=timeout) as resp:
+                    res = await resp.text()
+            except Exception as e:
+                logging.error(e)
+            else:
+                if return_type == 'json':
+                    return json.loads(res)
+                return res
+
+    async def crawler(self,
+                      url,
+                      method='GET',
+                      headers=None,
+                      data=None,
+                      proxy_type='pinzan',
+                      ua_type='mobile',
+                      return_type='json',
+                      timeout=5):
+        proxy = await self.get_proxy(proxy_type=proxy_type)
+        ua = await self.get_ua(ua_type=ua_type)
+        if ua:
+            headers['User-Agent'] = ua
+        else:
+            logging.warning(
+                "can't get avalible random ua,will use the defult!")
+        if proxy:
+            res = await self._crawler(url,
+                                      method=method,
+                                      headers=headers,
+                                      proxy=proxy,
+                                      data=data,
+                                      return_type=return_type,
+                                      timeout=timeout)
             return res
-
-
-async def common_request(session,
-                         url,
-                         method='GET',
-                         headers=None,
-                         data=None,
-                         proxy_type='zhilian',
-                         ua_type='mobile',
-                         return_type='json',
-                         timeout=3):
-    """[summary]
-
-    Args:
-        session ([type]): [description]
-        url ([type]): [description]
-        method (str, optional): [description]. Defaults to 'GET'.
-        headers ([type], optional): [description]. Defaults to None.
-        data ([type], optional): [description]. Defaults to None.
-        proxy_type (str, optional): [description]. Defaults to 'zhilian'.
-        ua_type (str, optional): [description]. Defaults to 'mobile'.
-        return_type (str, optional): [description]. Defaults to 'json'.
-
-    Raises:
-        Exception: [description]
-
-    Returns:
-        [type]: [description]
-    """
-    proxy = await get_proxy(session, proxy_type=proxy_type)
-    ua = await get_ua(session, ua_type=ua_type)
-    if ua:
-        headers['user-agent'] = ua
-    else:
-        logging.warning("can't get avalible random ua,will use the defult!")
-    if proxy:
-        res = await start_request(session,
-                                  url,
-                                  method=method,
-                                  headers=headers,
-                                  proxy=proxy,
-                                  data=data,
-                                  return_type=return_type,
-                                  timeout=timeout)
-        return res
-    else:
-        raise Exception("can't get proxy!")
+        else:
+            raise Exception("can't get proxy!")
