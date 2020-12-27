@@ -3,7 +3,7 @@ import logging
 import logging.handlers
 import os
 import random
-
+import asyncio
 import pybreaker
 import redis
 # from tenacity import retry
@@ -73,9 +73,10 @@ def init_redis_client(host='localhost', port=6379, password=None, db=0):
 
 
 class BasicSpider:
-    def __init__(self, session, retry_time=3) -> None:
+    def __init__(self, session, retry_time=3, concurrency=20) -> None:
         self.session = session
         self.retry_time = retry_time
+        self.sem = asyncio.Semaphore(concurrency)
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [
@@ -126,20 +127,21 @@ class BasicSpider:
                        timeout=5,
                        return_type='json'):
         for _ in range(self.retry_time - 1):
-            try:
-                async with self.session.request(method,
-                                                url,
-                                                headers=headers,
-                                                proxy=proxy,
-                                                data=data,
-                                                timeout=timeout) as resp:
-                    res = await resp.text()
-            except Exception as e:
-                logging.error(e)
-            else:
-                if return_type == 'json':
-                    return json.loads(res)
-                return res
+            async with self.sem:
+                try:
+                    async with self.session.request(method,
+                                                    url,
+                                                    headers=headers,
+                                                    proxy=proxy,
+                                                    data=data,
+                                                    timeout=timeout) as resp:
+                        res = await resp.text()
+                except Exception as e:
+                    logging.error(e)
+                else:
+                    if return_type == 'json':
+                        return json.loads(res)
+                    return res
 
     async def crawler(self,
                       url,
