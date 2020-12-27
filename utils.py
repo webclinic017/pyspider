@@ -19,4 +19,5 @@ def init_redis_client(host='localhost', port=6379, password=None, db=0):
         client = redis.Redis(connection_pool=pool)
     except Exception as e:
         print(e)
-    return client
+    else:
+        return client
