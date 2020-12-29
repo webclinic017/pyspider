@@ -3,10 +3,13 @@ import logging
 import random
 import json
 
+import aiohttp
+from aiohttp import ClientSession
 
-class BasicSpider:
-    def __init__(self, session, retry_time=3, concurrency=20) -> None:
-        self.session = session
+
+class BasicSpider():
+    def __init__(self, retry_time=3, concurrency=20) -> None:
+        self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.retry_time = retry_time
         self.sem = asyncio.Semaphore(concurrency)
 
@@ -35,7 +38,9 @@ class BasicSpider:
         Returns:
             [str]: [proxy]
         """
-        assert proxy_type in {'zhilian', '2808', 'dubsix', 'liebao'}
+        assert proxy_type in {
+            'zhilian', '2808', 'dubsix', 'liebao', 'liebaoV1'
+        }
         if proxy_type == 'zhilian':
             return 'http://2020061500002101216:cXr5v1Tm1MzF4RHK@forward.apeyun.com:9082'
         url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
@@ -86,6 +91,8 @@ class BasicSpider:
                       timeout=5):
         proxy = await self.get_proxy(proxy_type=proxy_type)
         ua = await self.get_ua(ua_type=ua_type)
+        if not headers:
+            headers = {}
         if ua:
             headers['User-Agent'] = ua
         else:
@@ -102,3 +109,22 @@ class BasicSpider:
             return res
         else:
             raise Exception("can't get proxy!")
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        if self.session:
+            await self.session.close()
+
+
+async def test():
+    async with BasicSpider() as spider:
+        res = await spider.crawler("https://www.baidu.com",
+                                   return_type='text',
+                                   proxy_type='liebaoV1')
+        print(res)
+
+
+if __name__ == "__main__":
+    asyncio.run(test())
