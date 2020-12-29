@@ -85,7 +85,7 @@ class BasicSpider():
                       headers=None,
                       method='GET',
                       data=None,
-                      proxy_type='pinzan',
+                      proxy_type='liebaoV1',
                       ua_type='mobile',
                       return_type='json',
                       timeout=5):
@@ -110,12 +110,15 @@ class BasicSpider():
         else:
             raise Exception("can't get proxy!")
 
+    async def close(self):
+        if self.session:
+            await self.session.close()
+
     async def __aenter__(self):
         return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        if self.session:
-            await self.session.close()
+        await self.close()
 
 
 async def test():
