@@ -8,7 +8,7 @@ RETRY_TIME = 3
 breaker = pybreaker.CircuitBreaker(fail_max=10)
 
 
-def init_redis_client(host='localhost', port=6379, password=None, db=0):
+def setup_redis(host='localhost', port=6379, password=None, db=0):
     """连接redis"""
     try:
         pool = redis.ConnectionPool(host=host,
