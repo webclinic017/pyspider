@@ -7,7 +7,7 @@ import aiohttp
 from aiohttp import ClientSession
 
 
-class BasicSpider():
+class AsyncSpider():
     def __init__(self, retry_time=3, concurrency=20) -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.retry_time = retry_time
@@ -111,8 +111,7 @@ class BasicSpider():
             raise Exception("can't get proxy!")
 
     async def close(self):
-        if self.session:
-            await self.session.close()
+        await self.session.close()
 
     async def __aenter__(self):
         return self
@@ -122,10 +121,10 @@ class BasicSpider():
 
 
 async def test():
-    async with BasicSpider() as spider:
-        res = await spider.crawler("https://www.baidu.com",
-                                   return_type='text',
-                                   proxy_type='liebaoV1')
+    async with AsyncSpider() as spider:
+        res = await spider.crawl("https://www.baidu.com",
+                                 return_type='text',
+                                 proxy_type='liebaoV1')
         print(res)
 
 
