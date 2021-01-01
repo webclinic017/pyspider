@@ -8,6 +8,8 @@ from aiohttp import ClientSession
 
 
 class AsyncSpider():
+    """异步爬虫，支持异步上下文管理器
+    """
     def __init__(self, retry_time=3, concurrency=20) -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.retry_time = retry_time
@@ -62,7 +64,23 @@ class AsyncSpider():
                      proxy=None,
                      data=None,
                      timeout=5,
-                     return_type='json'):
+                     return_type='json',
+                     delay=0.1):
+        """抓取url
+
+        Args:
+            url (str): 目标url.
+            method (str, optional): 请求方式. Defaults to 'GET'.
+            headers (dict, optional): 请求头. Defaults to None.
+            proxy (str), optional): 代理. Defaults to None.
+            data (str, optional): 请求体. Defaults to None.
+            timeout (int, optional): 超时. Defaults to 5.
+            return_type (str, optional): 返回数据类型. Defaults to 'json'.
+            delay (float|int, optional): 延时下载时间. Defaults to 0.1.
+
+        Returns:
+            str: 响应内容
+        """
         for _ in range(self.retry_time - 1):
             async with self.sem:
                 try:
@@ -72,6 +90,7 @@ class AsyncSpider():
                                                     proxy=proxy,
                                                     data=data,
                                                     timeout=timeout) as resp:
+                        await asyncio.sleep(delay)
                         res = await resp.text()
                 except Exception as e:
                     logging.error(e)
@@ -97,7 +116,7 @@ class AsyncSpider():
             headers['User-Agent'] = ua
         else:
             logging.warning(
-                "can't get avalible random ua,will use the defult!")
+                "can't get available random ua,will use the defult!")
         if proxy:
             res = await self._crawl(url,
                                     method=method,
@@ -118,15 +137,3 @@ class AsyncSpider():
 
     async def __aexit__(self, exc_type, exc_value, traceback):
         await self.close()
-
-
-async def test():
-    async with AsyncSpider() as spider:
-        res = await spider.crawl("https://www.baidu.com",
-                                 return_type='text',
-                                 proxy_type='liebaoV1')
-        print(res)
-
-
-if __name__ == "__main__":
-    asyncio.run(test())
