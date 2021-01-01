@@ -55,14 +55,14 @@ class BasicSpider():
             if proxy:
                 return 'http://' + proxy
 
-    async def _crawler(self,
-                       url,
-                       method='GET',
-                       headers=None,
-                       proxy=None,
-                       data=None,
-                       timeout=5,
-                       return_type='json'):
+    async def _crawl(self,
+                     url,
+                     method='GET',
+                     headers=None,
+                     proxy=None,
+                     data=None,
+                     timeout=5,
+                     return_type='json'):
         for _ in range(self.retry_time - 1):
             async with self.sem:
                 try:
@@ -80,15 +80,15 @@ class BasicSpider():
                         return json.loads(res)
                     return res
 
-    async def crawler(self,
-                      url,
-                      headers=None,
-                      method='GET',
-                      data=None,
-                      proxy_type='liebaoV1',
-                      ua_type='mobile',
-                      return_type='json',
-                      timeout=5):
+    async def crawl(self,
+                    url,
+                    headers=None,
+                    method='GET',
+                    data=None,
+                    proxy_type='liebaoV1',
+                    ua_type='mobile',
+                    return_type='json',
+                    timeout=5):
         proxy = await self.get_proxy(proxy_type=proxy_type)
         ua = await self.get_ua(ua_type=ua_type)
         if not headers:
@@ -99,13 +99,13 @@ class BasicSpider():
             logging.warning(
                 "can't get avalible random ua,will use the defult!")
         if proxy:
-            res = await self._crawler(url,
-                                      method=method,
-                                      headers=headers,
-                                      proxy=proxy,
-                                      data=data,
-                                      return_type=return_type,
-                                      timeout=timeout)
+            res = await self._crawl(url,
+                                    method=method,
+                                    headers=headers,
+                                    proxy=proxy,
+                                    data=data,
+                                    return_type=return_type,
+                                    timeout=timeout)
             return res
         else:
             raise Exception("can't get proxy!")
