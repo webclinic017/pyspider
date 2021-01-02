@@ -35,7 +35,7 @@ class RedisClient():
             self.db.expire(name, cache_cycle)
 
     def get_cache(self, name, key):
-        """ 
+        """
 
         Args:
             name ([type]): [description]
@@ -47,7 +47,12 @@ class RedisClient():
         cache = self.db.hget(name, key)
         return cache
 
-    def cache(self, name, key, value, cache_cycle=7, refresh: bool = False):
+    def cache(self,
+              name,
+              key,
+              value,
+              cache_cycle=7 * 24 * 3600,
+              refresh: bool = False):
         """
         获取和设置缓存
 
