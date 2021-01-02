@@ -97,7 +97,7 @@ class AsyncSpider():
             headers['User-Agent'] = ua
         else:
             logging.warning(
-                "can't get avalible random ua,will use the defult!")
+                "can't get available random ua,will use the defult!")
         if proxy:
             res = await self._crawl(url,
                                     method=method,
