@@ -13,4 +13,5 @@ redis_15 = {
     'db': 1,
     'decode_responses': True
 }
+
 REDIS_CONF = {'test': redis_test, 'redis15': redis_15}
