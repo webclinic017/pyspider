@@ -1,4 +1,9 @@
+import json
+from json.decoder import JSONDecodeError
+
 import redis
+
+from config.db_config import REDIS_CONF
 
 
 class RedisClient():
@@ -6,14 +11,10 @@ class RedisClient():
         self.db = self.setup_redis(env=env)
 
     @staticmethod
-    def _setup_redis(host='localhost', port=6379, db=0, password=None):
+    def _setup_redis(**kwargs):
         """连接redis"""
         try:
-            pool = redis.ConnectionPool(host=host,
-                                        port=port,
-                                        db=db,
-                                        password=password,
-                                        decode_responses=True)
+            pool = redis.ConnectionPool(**kwargs)
             client = redis.Redis(connection_pool=pool)
         except Exception as e:
             raise e
@@ -21,29 +22,25 @@ class RedisClient():
             return client
 
     def setup_redis(self, env='test'):
-        if env == 'prod':
-            return self._setup_redis(host="172.16.16.15",
-                                     port=6379,
-                                     password="20A3NBVJnWZtNzxumYOz",
-                                     db=1)
-        else:
-            return self._setup_redis()
+        return self._setup_redis(**REDIS_CONF[env])
 
     def set_cache(self, name, key, value, cache_cycle=7, refresh=False):
+        if isinstance(value, dict):
+            value = json.dumps(value, ensure_ascii=False)
         self.db.hset(name, key, value)
         if self.db.ttl(name) <= 0 or refresh:
             self.db.expire(name, cache_cycle)
 
     def get_cache(self, name, key):
         cache = self.db.hget(name, key)
+        if cache:
+            try:
+                cache = json.loads(cache)
+            except JSONDecodeError as e:
+                print(e)
         return cache
 
-    def cache(self,
-              name,
-              key,
-              value,
-              cache_cycle=7 * 24 * 3600,
-              refresh=False):
+    def cache(self, name, key, value, cache_cycle=1000, refresh=False):
         cache_data = self.get_cache(name, key)
         if not cache_data:
             self.set_cache(name,
