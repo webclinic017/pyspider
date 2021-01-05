@@ -24,8 +24,8 @@ class AsyncSpider():
         if ua_type == 'web':
             url = "http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa"
         try:
-            async with self.session.get(url) as resp:
-                res = await resp.json()
+            resp = await self.session.get(url)
+            res = await resp.json()
             ua = res['data']
             return ua
         except Exception as e:
@@ -48,8 +48,8 @@ class AsyncSpider():
         url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
             proxy_type)
         try:
-            async with self.session.request('GET', url) as res:
-                result = await res.json()
+            res = await self.session.request('GET', url)
+            result = await res.json()
         except Exception as e:
             logging.error(e)
         else:
@@ -84,14 +84,14 @@ class AsyncSpider():
         for _ in range(self.retry_time - 1):
             async with self.sem:
                 try:
-                    async with self.session.request(method,
-                                                    url,
-                                                    headers=headers,
-                                                    proxy=proxy,
-                                                    data=data,
-                                                    timeout=timeout) as resp:
-                        await asyncio.sleep(delay)
-                        res = await resp.text()
+                    resp = await self.session.request(method,
+                                                      url,
+                                                      headers=headers,
+                                                      proxy=proxy,
+                                                      data=data,
+                                                      timeout=timeout)
+                    await asyncio.sleep(delay)
+                    res = await resp.text()
                 except Exception as e:
                     logging.error(e)
                 else:

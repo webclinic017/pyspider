@@ -3,6 +3,7 @@ from json.decoder import JSONDecodeError
 
 import redis
 import sys
+import pymysql
 sys.path.append('..')
 from config.db_config import REDIS_CONF
 
@@ -51,6 +52,10 @@ class RedisClient():
                            refresh=refresh)
             return value
         return cache_data
+
+
+class MysqlClient:
+    pass
 
 
 if __name__ == "__main__":
