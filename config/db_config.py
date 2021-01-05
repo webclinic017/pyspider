@@ -18,8 +18,9 @@ mysql_test = {
     'host': 'localhost',
     'port': 3306,
     'user': 'wangxin',
-    'password': 965213,
+    'password': '965213',
     'db': 'mysql'
 }
 
 REDIS_CONF = {'test': redis_test, 'redis15': redis_15}
+MYSQL_CONF = {'test': mysql_test}

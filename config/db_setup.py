@@ -1,11 +1,12 @@
 import json
 from json.decoder import JSONDecodeError
+import logging
 
 import redis
 import sys
 import pymysql
 sys.path.append('..')
-from config.db_config import REDIS_CONF
+from config.db_config import REDIS_CONF, MYSQL_CONF
 
 
 class RedisClient():
@@ -55,9 +56,35 @@ class RedisClient():
 
 
 class MysqlClient:
-    pass
+    def __init__(self, env='test') -> None:
+        self.conn = self.setup_connection(env=env)
+        self.cursor = self.conn.cursor(pymysql.cursors.DictCursor)
+
+    @staticmethod
+    def _setup_connection(**kwargs):
+        try:
+            conn = pymysql.connect(**kwargs)
+        except pymysql.Error as e:
+            logging.error(f'数据库连接失败:{e}')
+            raise
+        return conn
+
+    def setup_connection(self, env='test'):
+        return self._setup_connection(**MYSQL_CONF[env])
+
+    def __enter__(self):
+        return self
+
+    def close(self):
+        self.cursor.close()
+        self.conn.close()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
 
 if __name__ == "__main__":
     r = RedisClient()
     r.set_cache('test1', 'key', 1, cache_cycle=20, refresh=True)
+    m = MysqlClient()
+    print(m)
