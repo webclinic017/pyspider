@@ -9,9 +9,11 @@ sys.path.append('..')
 from config.db_config import REDIS_CONF, MYSQL_CONF
 
 
-class RedisClient():
+class RedisClient(redis.Redis):
     def __init__(self, env='test') -> None:
-        self.db = self.setup_redis(env=env)
+        self.pool = redis.ConnectionPool(**REDIS_CONF[env])
+        super().__init__(connection_pool=self.pool)
+        # self.db = self.setup_redis(env=env)
 
     @staticmethod
     def _setup_redis(**kwargs):
@@ -28,14 +30,17 @@ class RedisClient():
         return self._setup_redis(**REDIS_CONF[env])
 
     def set_cache(self, name, key, value, cache_cycle=7, refresh=False):
+        """
+        设置键的生存时间
+        """
         if isinstance(value, dict):
             value = json.dumps(value, ensure_ascii=False)
-        self.db.hset(name, key, value)
-        if self.db.ttl(name) <= 0 or refresh:
-            self.db.expire(name, cache_cycle)
+        self.hset(name, key, value)
+        if self.ttl(name) <= 0 or refresh:
+            self.expire(name, cache_cycle)
 
     def get_cache(self, name, key):
-        cache = self.db.hget(name, key)
+        cache = self.hget(name, key)
         if cache:
             try:
                 cache = json.loads(cache)
@@ -72,12 +77,12 @@ class MysqlClient:
     def setup_connection(self, env='test'):
         return self._setup_connection(**MYSQL_CONF[env])
 
-    def __enter__(self):
-        return self
-
     def close(self):
         self.cursor.close()
         self.conn.close()
+
+    def __enter__(self):
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
