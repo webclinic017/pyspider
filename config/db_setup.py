@@ -77,6 +77,19 @@ class MysqlClient:
     def setup_connection(self, env='test'):
         return self._setup_connection(**MYSQL_CONF[env])
 
+    def create_table(self, sql):
+        # sql = "CREATE TABLE if not exists birds (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
+        self.cursor.execute(sql)
+
+    def insert_data(self, sql):
+        # sql = "INSERT INTO birds (name,description) VALUES ('alix minor','wood duck')"
+        try:
+            self.cursor.execute(sql)
+            self.conn.commit()
+        except pymysql.err.OperationalError as e:
+            logging.error(e)
+            self.conn.rollback()
+
     def close(self):
         self.cursor.close()
         self.conn.close()
@@ -92,4 +105,6 @@ if __name__ == "__main__":
     r = RedisClient()
     r.set_cache('test1', 'key', 1, cache_cycle=20, refresh=True)
     m = MysqlClient()
-    print(m)
+    # m.create_table()
+    # m.insert_data()
+    m.close()
