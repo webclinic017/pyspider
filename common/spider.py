@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import random
-import json
+import ujson
 
 import aiohttp
 from aiohttp import ClientSession
@@ -96,7 +96,7 @@ class AsyncSpider():
                     logging.error(e)
                 else:
                     if return_type == 'json':
-                        return json.loads(res)
+                        return ujson.loads(res)
                     return res
 
     async def crawl(self,
