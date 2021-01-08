@@ -5,6 +5,7 @@ import ujson
 
 import aiohttp
 from aiohttp import ClientSession
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 class AsyncSpider():
