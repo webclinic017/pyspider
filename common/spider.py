@@ -48,15 +48,16 @@ class AsyncSpider():
             return 'http://2020061500002101216:cXr5v1Tm1MzF4RHK@forward.apeyun.com:9082'
         url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
             proxy_type)
-        try:
-            res = await self.session.request('GET', url)
-            result = await res.json()
-        except Exception as e:
-            logging.error(e)
-        else:
-            proxy = result.get('data')
-            if proxy:
-                return 'http://' + proxy
+        for _ in range(self.retry_time):
+            try:
+                res = await self.session.request('GET', url)
+                result = await res.json()
+            except Exception as e:
+                logging.error(e)
+            else:
+                proxy = result.get('data')
+                if proxy:
+                    return 'http://' + proxy
 
     async def _crawl(self,
                      url,
