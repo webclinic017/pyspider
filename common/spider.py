@@ -64,7 +64,7 @@ class AsyncSpider():
                      data=None,
                      timeout=5,
                      return_type='json',
-                     delay=0.1):
+                     delay=1):
         """抓取url
 
         Args:
