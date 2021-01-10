@@ -41,11 +41,7 @@ class AsyncSpider():
         Returns:
             [str]: [proxy]
         """
-        assert proxy_type in {
-            'zhilian', '2808', 'dubsix', 'liebao', 'liebaoV1'
-        }
-        if proxy_type == 'zhilian':
-            return 'http://2020061500002101216:cXr5v1Tm1MzF4RHK@forward.apeyun.com:9082'
+        assert proxy_type in {'2808', 'dubsix', 'liebao', 'liebaoV1'}
         url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
             proxy_type)
         for _ in range(self.retry_time):
