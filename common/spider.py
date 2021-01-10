@@ -1,4 +1,5 @@
 import asyncio
+from json.decoder import JSONDecodeError
 import logging
 import random
 import ujson
@@ -82,19 +83,22 @@ class AsyncSpider():
         for _ in range(self.retry_time - 1):
             async with self.sem:
                 try:
-                    resp = await self.session.request(method,
-                                                      url,
-                                                      headers=headers,
-                                                      proxy=proxy,
-                                                      data=data,
-                                                      timeout=timeout)
-                    await asyncio.sleep(delay)
-                    res = await resp.text()
+                    async with self.session.request(method,
+                                                    url,
+                                                    headers=headers,
+                                                    proxy=proxy,
+                                                    data=data,
+                                                    timeout=timeout) as resp:
+                        await asyncio.sleep(delay)
+                        res = await resp.text()
                 except Exception as e:
                     logging.error(e)
                 else:
                     if return_type == 'json':
-                        return ujson.loads(res)
+                        try:
+                            return ujson.loads(res)
+                        except JSONDecodeError as e:
+                            logging.error(e)
                     return res
 
     async def crawl(self,
