@@ -80,26 +80,25 @@ class AsyncSpider():
         Returns:
             str: 响应内容
         """
-        for _ in range(self.retry_time - 1):
-            async with self.sem:
-                try:
-                    async with self.session.request(method,
-                                                    url,
-                                                    headers=headers,
-                                                    proxy=proxy,
-                                                    data=data,
-                                                    timeout=timeout) as resp:
-                        await asyncio.sleep(delay)
-                        res = await resp.text()
-                except aiohttp.ClientError as e:
-                    logging.error(e)
-                else:
-                    if return_type == 'json':
-                        try:
-                            return ujson.loads(res)
-                        except JSONDecodeError as e:
-                            logging.error(e)
-                    return res
+        async with self.sem:
+            try:
+                async with self.session.request(method,
+                                                url,
+                                                headers=headers,
+                                                proxy=proxy,
+                                                data=data,
+                                                timeout=timeout) as resp:
+                    await asyncio.sleep(delay)
+                    res = await resp.text()
+            except aiohttp.ClientError as e:
+                logging.error(f'请求{url}出错:{e}')
+            else:
+                if return_type == 'json':
+                    try:
+                        return ujson.loads(res)
+                    except JSONDecodeError as e:
+                        logging.error(e)
+                return res
 
     async def crawl(self,
                     url,
@@ -110,7 +109,6 @@ class AsyncSpider():
                     ua_type='mobile',
                     return_type='json',
                     timeout=5):
-        proxy = await self.get_proxy(proxy_type=proxy_type)
         ua = await self.get_ua(ua_type=ua_type)
         if not headers:
             headers = {}
@@ -119,17 +117,20 @@ class AsyncSpider():
         else:
             logging.warning(
                 "can't get available random ua,will use the defult!")
-        if proxy:
-            res = await self._crawl(url,
-                                    method=method,
-                                    headers=headers,
-                                    proxy=proxy,
-                                    data=data,
-                                    return_type=return_type,
-                                    timeout=timeout)
-            return res
-        else:
-            raise Exception("can't get proxy!")
+        for _ in range(self.retry_time):
+            proxy = await self.get_proxy(proxy_type=proxy_type)
+            if proxy:
+                res = await self._crawl(url,
+                                        method=method,
+                                        headers=headers,
+                                        proxy=proxy,
+                                        data=data,
+                                        return_type=return_type,
+                                        timeout=timeout)
+                if res:
+                    return res
+            else:
+                logging.error("can't get proxy!")
 
     async def close(self):
         await self.session.close()
