@@ -47,8 +47,8 @@ class AsyncSpider():
             proxy_type)
         for _ in range(self.retry_time):
             try:
-                res = await self.session.request('GET', url)
-                result = await res.json()
+                async with self.session.request('GET', url) as res:
+                    result = await res.json()
             except Exception as e:
                 logging.error(e)
             else:
