@@ -90,7 +90,7 @@ class AsyncSpider():
                                                 timeout=timeout) as resp:
                     await asyncio.sleep(delay)
                     res = await resp.text()
-            except aiohttp.ClientError as e:
+            except Exception as e:
                 logging.error(f'请求{url}出错:{e}')
             else:
                 if return_type == 'json':
