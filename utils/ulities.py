@@ -1,4 +1,6 @@
+import random
 import re
+import string
 
 _ITERABLE_SINGLE_VALUES = dict, str, bytes
 
@@ -42,3 +44,8 @@ def arg_to_iter(arg):
         return arg
     else:
         return [arg]
+
+
+def gen_random_str(length):
+    return "".join(
+        random.sample(string.ascii_lowercase + string.digits, length))
