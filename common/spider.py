@@ -12,10 +12,14 @@ asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 class AsyncSpider:
     """异步爬虫，支持异步上下文管理器
     """
-    def __init__(self, retry_time=3, concurrency=20) -> None:
+    def __init__(self, retry_time=3, concurrency=20, logger=None) -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.retry_time = retry_time
         self.sem = asyncio.Semaphore(concurrency)
+        if logger:
+            self.logger = logger
+        else:
+            self.logger = logging.getLogger(__name__)
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [
@@ -31,7 +35,7 @@ class AsyncSpider:
             ua = res['data']
             return ua
         except Exception as e:
-            logging.error(f"获取ua出错：{e}")
+            self.logger.error(f"获取ua出错：{e}")
 
     async def get_proxy(self, proxy_type='pinzan'):
         """获取代理
@@ -50,7 +54,7 @@ class AsyncSpider:
                 async with self.session.request('GET', url) as res:
                     result = await res.json()
             except Exception as e:
-                logging.error(e)
+                self.logger.error(e)
             else:
                 proxy = result.get('data')
                 if proxy:
@@ -91,13 +95,13 @@ class AsyncSpider:
                     await asyncio.sleep(delay)
                     res = await resp.text()
             except Exception as e:
-                logging.error(f'请求{url}出错:{e}')
+                self.logger.error(f'请求{url}出错:{e}')
             else:
                 if return_type == 'json':
                     try:
                         return ujson.loads(res)
                     except JSONDecodeError as e:
-                        logging.error(e)
+                        self.logger.error(e)
                 return res
 
     async def crawl(self,
@@ -115,7 +119,7 @@ class AsyncSpider:
         if ua:
             headers['User-Agent'] = ua
         else:
-            logging.warning(
+            self.logger.warning(
                 "can't get available random ua,will use the defult!")
         for _ in range(self.retry_time):
             proxy = await self.get_proxy(proxy_type=proxy_type)
@@ -130,7 +134,7 @@ class AsyncSpider:
                 if res:
                     return res
             else:
-                logging.error("can't get proxy!")
+                self.logger.error("can't get proxy!")
 
     async def close(self):
         if self.session:

@@ -8,7 +8,7 @@ from config.db_setup import RedisClient, MysqlClient
 
 async def fetch_page():
     async with AsyncSpider() as spider:
-        res = await spider.crawl("http://www.baidu.com",
+        res = await spider.crawl("https://python.org",
                                  return_type='text',
                                  proxy_type='liebaoV1')
         return res
@@ -17,7 +17,7 @@ async def fetch_page():
 def test_async_spider():
     res = asyncio.run(fetch_page())
     # print(res)
-    assert res is not None
+    assert 'python' in res
 
 
 def test_redis_client():
@@ -35,7 +35,7 @@ def test_redis_client():
 
 def test_mysql_client():
     mysql_client = MysqlClient()
-    sql = "CREATE TABLE mytest (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
+    sql = "CREATE TABLE if not exists mytest (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
     r = mysql_client.create_table(sql)
     mysql_client.close()
     assert r is True
