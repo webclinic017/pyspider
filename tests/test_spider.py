@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(os.pardir)
 from common.spider import AsyncSpider
-from config.db_setup import RedisClient
+from config.db_setup import RedisClient, MysqlClient
 
 
 async def fetch_page():
@@ -31,6 +31,14 @@ def test_redis_client():
                            refresh=True)
     assert redis_client.exists(new_var) == 1
     assert redis_client.ttl(new_var) == cache_cycle
+
+
+def test_mysql_client():
+    mysql_client = MysqlClient()
+    sql = "CREATE TABLE mytest (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
+    r = mysql_client.create_table(sql)
+    mysql_client.close()
+    assert r is True
 
 
 if __name__ == "__main__":

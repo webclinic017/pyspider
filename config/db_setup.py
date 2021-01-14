@@ -80,6 +80,7 @@ class MysqlClient:
     def create_table(self, sql):
         # sql = "CREATE TABLE if not exists birds (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
         self.cursor.execute(sql)
+        return True
 
     def insert_data(self, sql):
         # sql = "INSERT INTO birds (name,description) VALUES ('alix minor','wood duck')"

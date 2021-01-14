@@ -9,7 +9,7 @@ from aiohttp import ClientSession
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-class AsyncSpider():
+class AsyncSpider:
     """异步爬虫，支持异步上下文管理器
     """
     def __init__(self, retry_time=3, concurrency=20) -> None:
@@ -133,7 +133,8 @@ class AsyncSpider():
                 logging.error("can't get proxy!")
 
     async def close(self):
-        await self.session.close()
+        if self.session:
+            await self.session.close()
 
     async def __aenter__(self):
         return self
