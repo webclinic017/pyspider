@@ -41,4 +41,5 @@ REDIS_CONF = {
     'aio_test': aioredis_test,
     'aio_redis15': aioredis_15
 }
+
 MYSQL_CONF = {'test': mysql_test}
