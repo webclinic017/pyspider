@@ -13,6 +13,19 @@ redis_15 = {
     'db': 1,
     'decode_responses': True
 }
+aioredis_test = {
+    'address': ('localhost', 6379),
+    'password': None,
+    'db': 0,
+    'encoding': 'utf-8'
+}
+
+aioredis_15 = {
+    'address': ('172.16.16.15', 6379),
+    'password': '20A3NBVJnWZtNzxumYOz',
+    'db': 1,
+    'encoding': 'utf-8'
+}
 
 mysql_test = {
     'host': 'localhost',
@@ -22,5 +35,10 @@ mysql_test = {
     'db': 'mysql'
 }
 
-REDIS_CONF = {'test': redis_test, 'redis15': redis_15}
+REDIS_CONF = {
+    'test': redis_test,
+    'redis15': redis_15,
+    'aio_test': aioredis_test,
+    'aio_redis15': aioredis_15
+}
 MYSQL_CONF = {'test': mysql_test}

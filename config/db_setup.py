@@ -1,6 +1,8 @@
+import asyncio
 import json
 from json.decoder import JSONDecodeError
 import logging
+import aioredis
 
 import redis
 import sys
@@ -102,10 +104,29 @@ class MysqlClient:
         self.close()
 
 
+class AioRedis:
+    def __init__(self, env='aio_test') -> None:
+        self.env = env
+
+    async def setup(self):
+        try:
+            aioredis_client = await aioredis.create_redis_pool(
+                **REDIS_CONF[self.env])
+        except Exception as e:
+            raise Exception(f'异步redis连接失败:{e}')
+        return aioredis_client
+
+    async def close(self):
+        client = await self.setup()
+        client.close()
+        await client.wait_closed()
+
+    async def __aenter__(self):
+        return await self.setup()
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self.close()
+
+
 if __name__ == "__main__":
-    r = RedisClient()
-    r.set_cache('test1', 'key', 1, cache_cycle=20, refresh=True)
-    m = MysqlClient()
-    # m.create_table()
-    # m.insert_data()
-    m.close()
+    r = asyncio.run(AioRedis().setup())

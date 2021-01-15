@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(os.pardir)
 from common.spider import AsyncSpider
-from config.db_setup import RedisClient, MysqlClient
+from config.db_setup import RedisClient, MysqlClient, AioRedis
 
 
 async def fetch_page():
@@ -39,6 +39,17 @@ def test_mysql_client():
     r = mysql_client.create_table(sql)
     mysql_client.close()
     assert r is True
+
+
+async def conn_aioredis():
+    async with AioRedis() as redis_client:
+        await redis_client.set('my_key', 'value')
+        return await redis_client.get('my_key')
+
+
+def test_aioredis():
+    r = asyncio.run(conn_aioredis())
+    assert r == 'value'
 
 
 if __name__ == "__main__":

@@ -2,11 +2,14 @@ import asyncio
 from json.decoder import JSONDecodeError
 import logging
 import random
+import sys
+
 import ujson
 
 import aiohttp
 from aiohttp import ClientSession
-asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 class AsyncSpider:
@@ -20,6 +23,7 @@ class AsyncSpider:
             self.logger = logger
         else:
             self.logger = logging.getLogger(__name__)
+        self.request_queue = asyncio.Queue()
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [
@@ -66,6 +70,7 @@ class AsyncSpider:
                      headers=None,
                      proxy=None,
                      data=None,
+                     params=None,
                      timeout=5,
                      return_type='json',
                      delay=1):
@@ -91,6 +96,7 @@ class AsyncSpider:
                                                 headers=headers,
                                                 proxy=proxy,
                                                 data=data,
+                                                params=params,
                                                 timeout=timeout) as resp:
                     await asyncio.sleep(delay)
                     res = await resp.text()
@@ -109,6 +115,7 @@ class AsyncSpider:
                     headers=None,
                     method='GET',
                     data=None,
+                    params=None,
                     proxy_type='liebaoV1',
                     ua_type='mobile',
                     return_type='json',
@@ -129,12 +136,54 @@ class AsyncSpider:
                                         headers=headers,
                                         proxy=proxy,
                                         data=data,
+                                        params=params,
                                         return_type=return_type,
                                         timeout=timeout)
                 if res:
                     return res
             else:
                 self.logger.error("can't get proxy!")
+
+    async def multiple_request(self, **kwargs):
+        result = await asyncio.gather(*[
+            asyncio.create_task(self.crawl(url, **kwargs)) for url in range(10)
+        ])
+        return result
+
+    async def start_worker(self):
+        """
+        Start spider worker
+        :return:
+        """
+        while True:
+            request_item = await self.request_queue.get()
+            self.worker_tasks.append(request_item)
+            if self.request_queue.empty():
+                results = await asyncio.gather(*self.worker_tasks,
+                                               return_exceptions=True)
+                print(results)
+                # for task_result in results:
+                #     if not isinstance(task_result,
+                #                       RuntimeError) and task_result:
+                #         callback_results, response = task_result
+                #         if isinstance(callback_results, AsyncGeneratorType):
+                #             await self._process_async_callback(
+                #                 callback_results, response)
+                self.worker_tasks = []
+            self.request_queue.task_done()
+
+    # @staticmethod
+    # async def cancel_all_tasks():
+    #     """
+    #     Cancel all tasks
+    #     :return:
+    #     """
+    #     tasks = []
+    #     for task in asyncio.Task.all_tasks():
+    #         if task is not asyncio.tasks.Task.current_task():
+    #             tasks.append(task)
+    #             task.cancel()
+    #     await asyncio.gather(*tasks, return_exceptions=True)
 
     async def close(self):
         if self.session:
