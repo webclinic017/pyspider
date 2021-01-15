@@ -24,6 +24,7 @@ class AsyncSpider:
         else:
             self.logger = logging.getLogger(__name__)
         self.request_queue = asyncio.Queue()
+        self.request_body_list = {}
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [
@@ -150,11 +151,7 @@ class AsyncSpider:
         ])
         return result
 
-    async def start_worker(self):
-        """
-        Start spider worker
-        :return:
-        """
+    async def request_worker(self):
         while True:
             request_item = await self.request_queue.get()
             self.worker_tasks.append(request_item)
@@ -162,15 +159,14 @@ class AsyncSpider:
                 results = await asyncio.gather(*self.worker_tasks,
                                                return_exceptions=True)
                 print(results)
-                # for task_result in results:
-                #     if not isinstance(task_result,
-                #                       RuntimeError) and task_result:
-                #         callback_results, response = task_result
-                #         if isinstance(callback_results, AsyncGeneratorType):
-                #             await self._process_async_callback(
-                #                 callback_results, response)
                 self.worker_tasks = []
+                return results
             self.request_queue.task_done()
+
+    async def request_producer(self):
+        for url, request_body in self.request_body_list.items():
+            task = asyncio.create_task(self.crawl(url, **request_body))
+            self.request_queue.put_nowait(task)
 
     # @staticmethod
     # async def cancel_all_tasks():
