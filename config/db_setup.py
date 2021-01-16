@@ -3,6 +3,7 @@ import json
 from json.decoder import JSONDecodeError
 import logging
 import aioredis
+import aiomysql
 
 import redis
 import sys
@@ -128,5 +129,15 @@ class AioRedis:
         await self.close()
 
 
+class AioMysql:
+    def __init__(self, env='test') -> None:
+        self.env = env
+
+    async def setup(self):
+        self.conn = await aiomysql.connect(**MYSQL_CONF[self.env])
+        self.cursor = await self.conn.cursor()
+
+
 if __name__ == "__main__":
     r = asyncio.run(AioRedis().setup())
+    m = asyncio.run(AioMysql().setup())
