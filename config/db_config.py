@@ -1,3 +1,5 @@
+import json
+
 redis_test = {
     'host': 'localhost',
     'port': 6379,
@@ -35,6 +37,11 @@ mysql_test = {
     'db': 'mysql'
 }
 
+kafka_test = {
+    'bootstrap_servers': ['localhost:9092'],
+    'value_serializer': lambda m: json.dumps(m).encode('utf8')
+}
+
 REDIS_CONF = {
     'test': redis_test,
     'redis15': redis_15,
@@ -43,3 +50,5 @@ REDIS_CONF = {
 }
 
 MYSQL_CONF = {'test': mysql_test}
+
+KAFKA_CONF = {'test': kafka_test}

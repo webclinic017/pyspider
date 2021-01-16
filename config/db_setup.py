@@ -4,12 +4,13 @@ from json.decoder import JSONDecodeError
 import logging
 import aioredis
 import aiomysql
+import kafka
 
 import redis
 import sys
 import pymysql
 sys.path.append('..')
-from config.db_config import REDIS_CONF, MYSQL_CONF
+from config.db_config import REDIS_CONF, MYSQL_CONF, KAFKA_CONF
 
 
 class RedisClient(redis.Redis):
@@ -132,10 +133,51 @@ class AioRedis:
 class AioMysql:
     def __init__(self, env='test') -> None:
         self.env = env
+        self.conn = None
+        self.cursor = None
 
     async def setup(self):
         self.conn = await aiomysql.connect(**MYSQL_CONF[self.env])
         self.cursor = await self.conn.cursor()
+
+    async def close(self):
+        if self.cursor:
+            await self.cursor()
+        if self.conn:
+            await self.conn.close()
+
+    async def ___aenter__(self):
+        await self.setup()
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        await self.close()
+
+
+class KafkaClient:
+    def __init__(self, env='test', logger=None) -> None:
+        self.env = env
+        self.producer = kafka.KafkaProducer(**KAFKA_CONF[self.env])
+        self.consumer = kafka.KafkaConsumer(**KAFKA_CONF[self.env])
+        if not logger:
+            self.logger = logging.getLogger(__name__)
+        else:
+            self.logger = logger
+
+    def produce(self, topic, value, key=None):
+        self.producer.send(topic, value, key=key).add_callback(
+            self.on_send_success).add_errback(self.on_send_error)
+
+    def consume(self, *topics):
+        self.consumer.subscribe(topics)
+        for msg in self.consumer:
+            print(msg.value)
+
+    def on_send_success(self, record_metadata):
+        self.logger.info('Message delivered to {} [{}]'.format(
+            record_metadata.topic, record_metadata.partition))
+
+    def on_send_error(self, exc):
+        self.logger.error('I am an errback', exc_info=exc)
 
 
 if __name__ == "__main__":
