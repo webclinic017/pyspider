@@ -14,8 +14,8 @@ from config.db_config import REDIS_CONF, MYSQL_CONF, KAFKA_CONF
 
 
 class RedisClient(redis.Redis):
-    def __init__(self, env='test') -> None:
-        self.pool = redis.ConnectionPool(**REDIS_CONF[env])
+    def __init__(self, env='test', db=0) -> None:
+        self.pool = redis.ConnectionPool(db=db, **REDIS_CONF[env])
         super().__init__(connection_pool=self.pool)
         # self.db = self.setup_redis(env=env)
 
@@ -181,5 +181,7 @@ class KafkaClient:
 
 
 if __name__ == "__main__":
-    r = asyncio.run(AioRedis().setup())
-    m = asyncio.run(AioMysql().setup())
+    _r = RedisClient().get('test')
+    print(_r)
+    # r = asyncio.run(AioRedis().setup())
+    # m = asyncio.run(AioMysql().setup())
