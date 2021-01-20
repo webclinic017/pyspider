@@ -1,9 +1,11 @@
 import asyncio
 import sys
 import os
+import pytest
+import pytest_asyncio
 sys.path.append(os.pardir)
 from common.spider import AsyncSpider
-from config.db_setup import RedisClient, MysqlClient, AioRedis
+from config.db_setup import RedisClient, MysqlClient, AioRedis, AioMysql
 
 
 async def fetch_page():
@@ -50,6 +52,18 @@ async def conn_aioredis():
 def test_aioredis():
     r = asyncio.run(conn_aioredis())
     assert r == 'value'
+
+
+async def conn_aiomysql():
+    sql = "CREATE TABLE if not exists pytest (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
+    async with AioMysql() as mysql_client:
+        r = await mysql_client.create_table(sql)
+    return r
+
+
+def test_aiomysql():
+    r = asyncio.run(conn_aiomysql())
+    assert r == True
 
 
 if __name__ == "__main__":

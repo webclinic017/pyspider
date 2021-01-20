@@ -3,7 +3,7 @@ from json.decoder import JSONDecodeError
 import logging
 import random
 import sys
-
+from concurrent.futures import ThreadPoolExecutor
 import ujson
 
 import aiohttp
@@ -25,6 +25,7 @@ class AsyncSpider:
             self.logger = logging.getLogger(__name__)
         self.request_queue = asyncio.Queue()
         self.request_body_list = {}
+        self.executor = ThreadPoolExecutor()
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [
@@ -184,6 +185,8 @@ class AsyncSpider:
     async def close(self):
         if self.session:
             await self.session.close()
+        if self.executor:
+            self.executor.shutdown()
 
     async def __aenter__(self):
         return self

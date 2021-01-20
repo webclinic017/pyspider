@@ -137,17 +137,26 @@ class AioMysql:
         self.cursor = None
 
     async def setup(self):
-        self.conn = await aiomysql.connect(**MYSQL_CONF[self.env])
+        self.pool = await aiomysql.create_pool(**MYSQL_CONF[self.env])
+        self.conn = await self.pool.acquire()
         self.cursor = await self.conn.cursor()
+
+    async def create_table(self, sql):
+        await self.cursor.execute(sql)
+        return True
 
     async def close(self):
         if self.cursor:
-            await self.cursor()
-        if self.conn:
-            await self.conn.close()
+            await self.cursor.close()
+        # if self.conn:
+        #     await self.conn.close()
+        if self.pool:
+            self.pool.close()
+            await self.pool.wait_closed()
 
-    async def ___aenter__(self):
+    async def __aenter__(self):
         await self.setup()
+        return self
 
     async def __aexit__(self, exc_type, exc_value, traceback):
         await self.close()
@@ -180,8 +189,16 @@ class KafkaClient:
         self.logger.error('I am an errback', exc_info=exc)
 
 
+async def conn_aiomysql():
+    sql = "CREATE TABLE if not exists test_mysql (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
+    async with AioMysql() as mysql_client:
+        r = await mysql_client.create_table(sql)
+    print(r)
+
+
 if __name__ == "__main__":
-    _r = RedisClient().get('test')
-    print(_r)
+    # _r = RedisClient().get('test')
+    # print(_r)
     # r = asyncio.run(AioRedis().setup())
     # m = asyncio.run(AioMysql().setup())
+    asyncio.run(conn_aiomysql())
