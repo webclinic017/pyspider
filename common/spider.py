@@ -1,13 +1,14 @@
 import asyncio
-from json.decoder import JSONDecodeError
 import logging
 import random
 import sys
 from concurrent.futures import ThreadPoolExecutor
-import ujson
+from json.decoder import JSONDecodeError
 
 import aiohttp
+import ujson
 from aiohttp import ClientSession
+
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -15,17 +16,23 @@ if sys.platform == 'win32':
 class AsyncSpider:
     """异步爬虫，支持异步上下文管理器
     """
-    def __init__(self, retry_time=3, concurrency=20, logger=None) -> None:
+    retry_time = 3
+    concurrency = 20
+    logger = None
+    delay = 0.1
+    proxy = 'liebaoV1'
+
+    def __init__(self, logger=None) -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
-        self.retry_time = retry_time
-        self.sem = asyncio.Semaphore(concurrency)
+        self.sem = asyncio.Semaphore(self.concurrency)
         if logger:
             self.logger = logger
         else:
             self.logger = logging.getLogger(__name__)
-        self.request_queue = asyncio.Queue()
-        self.request_body_list = {}
+        self.request_queue = asyncio.Queue(maxsize=1000)
+        self.request_body_list = []
         self.executor = ThreadPoolExecutor()
+        self.worker_tasks = []
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [
@@ -52,7 +59,7 @@ class AsyncSpider:
         Returns:
             [str]: [proxy]
         """
-        assert proxy_type in {'2808', 'dubsix', 'liebao', 'liebaoV1'}
+        assert proxy_type in {'pinzan', 'dubsix', 'liebao', 'liebaoV1'}
         url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
             proxy_type)
         for _ in range(self.retry_time):
@@ -74,8 +81,7 @@ class AsyncSpider:
                      data=None,
                      params=None,
                      timeout=5,
-                     return_type='json',
-                     delay=1):
+                     return_type='json'):
         """抓取url
 
         Args:
@@ -100,7 +106,7 @@ class AsyncSpider:
                                                 data=data,
                                                 params=params,
                                                 timeout=timeout) as resp:
-                    await asyncio.sleep(delay)
+                    await asyncio.sleep(self.delay)
                     res = await resp.text()
             except Exception as e:
                 self.logger.error(f'请求{url}出错:{e}')
@@ -113,25 +119,28 @@ class AsyncSpider:
                 return res
 
     async def crawl(self,
-                    url,
+                    url=None,
                     headers=None,
                     method='GET',
                     data=None,
                     params=None,
-                    proxy_type='liebaoV1',
                     ua_type='mobile',
                     return_type='json',
                     timeout=5):
+        if not url:
+            raise Exception("url must not be None!")
         ua = await self.get_ua(ua_type=ua_type)
         if not headers:
             headers = {}
         if ua:
             headers['User-Agent'] = ua
+            if 'user-agent' in headers:
+                del headers['user-agent']
         else:
             self.logger.warning(
                 "can't get available random ua,will use the defult!")
         for _ in range(self.retry_time):
-            proxy = await self.get_proxy(proxy_type=proxy_type)
+            proxy = await self.get_proxy(proxy_type=self.proxy)
             if proxy:
                 res = await self._crawl(url,
                                         method=method,
@@ -146,11 +155,11 @@ class AsyncSpider:
             else:
                 self.logger.error("can't get proxy!")
 
-    async def multiple_request(self, **kwargs):
-        result = await asyncio.gather(*[
-            asyncio.create_task(self.crawl(url, **kwargs)) for url in range(10)
-        ])
-        return result
+    # async def multiple_request(self, **kwargs):
+    #     result = await asyncio.gather(*[
+    #         asyncio.create_task(self.crawl(url, **kwargs)) for url in range(10)
+    #     ])
+    #     return result
 
     async def request_worker(self):
         while True:
@@ -159,15 +168,23 @@ class AsyncSpider:
             if self.request_queue.empty():
                 results = await asyncio.gather(*self.worker_tasks,
                                                return_exceptions=True)
-                print(results)
+                # print(results)
                 self.worker_tasks = []
                 return results
             self.request_queue.task_done()
 
     async def request_producer(self):
-        for url, request_body in self.request_body_list.items():
-            task = asyncio.create_task(self.crawl(url, **request_body))
-            self.request_queue.put_nowait(task)
+        for request_body in self.request_body_list:
+            task = asyncio.create_task(self.crawl(**request_body))
+            await self.request_queue.put(task)
+
+    async def make_request_body(self):
+        raise NotImplementedError
+
+    async def run(self):
+        await self.make_request_body()
+        await self.request_producer()
+        await self.request_worker()
 
     # @staticmethod
     # async def cancel_all_tasks():
