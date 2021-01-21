@@ -21,6 +21,7 @@ class AsyncSpider:
     logger = None
     delay = 0.1
     proxy = 'liebaoV1'
+    ua_type = 'web'
 
     def __init__(self, logger=None) -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
@@ -124,12 +125,11 @@ class AsyncSpider:
                     method='GET',
                     data=None,
                     params=None,
-                    ua_type='mobile',
                     return_type='json',
                     timeout=5):
         if not url:
             raise Exception("url must not be None!")
-        ua = await self.get_ua(ua_type=ua_type)
+        ua = await self.get_ua(ua_type=self.ua_type)
         if not headers:
             headers = {}
         if ua:
@@ -168,7 +168,7 @@ class AsyncSpider:
             if self.request_queue.empty():
                 results = await asyncio.gather(*self.worker_tasks,
                                                return_exceptions=True)
-                # print(results)
+                print(results)
                 self.worker_tasks = []
                 return results
             self.request_queue.task_done()
