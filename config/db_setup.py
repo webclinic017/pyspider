@@ -1,16 +1,18 @@
 import asyncio
 import json
-from json.decoder import JSONDecodeError
 import logging
-import aioredis
-import aiomysql
-import kafka
-
-import redis
 import sys
+from contextlib import asynccontextmanager
+from json.decoder import JSONDecodeError
+
+import aiomysql
+import aioredis
+import kafka
 import pymysql
+import redis
+
 sys.path.append('..')
-from config.db_config import REDIS_CONF, MYSQL_CONF, KAFKA_CONF
+from config.db_config import KAFKA_CONF, MYSQL_CONF, REDIS_CONF
 
 
 class RedisClient(redis.Redis):
@@ -128,6 +130,21 @@ class AioRedis:
 
     async def __aexit__(self, exc_type, exc_value, traceback):
         await self.close()
+
+
+@asynccontextmanager
+async def aio_mysql(env='test'):
+    pool = await aiomysql.create_pool(**MYSQL_CONF[env])
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            try:
+                yield cur
+            except Exception as e:
+                logging.error(e)
+            finally:
+                cur.close()
+    pool.close()
+    await pool.wait_closed()
 
 
 class AioMysql:
