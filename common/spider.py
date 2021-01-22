@@ -66,7 +66,7 @@ class AsyncSpider:
         Returns:
             [str]: [proxy]
         """
-        assert proxy_type in {'pinzan', 'dubsix', 'liebao', 'liebaoV1'}
+        assert proxy_type in {'pinzan', 'dubsix', '2808', 'liebaoV1'}
         url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
             proxy_type)
         for _ in range(self.retry_time):
@@ -74,7 +74,7 @@ class AsyncSpider:
                 async with self.session.request('GET', url) as res:
                     result = await res.json()
             except Exception as e:
-                self.logger.error(e)
+                self.logger.error(f'获取代理出错：{e}')
             else:
                 proxy = result.get('data')
                 if proxy:
@@ -175,6 +175,7 @@ class AsyncSpider:
                 results = await asyncio.gather(*self.worker_tasks,
                                                return_exceptions=True)
                 print(results)
+                print(len(results))
                 self.worker_tasks = []
                 return results
             self.request_queue.task_done()

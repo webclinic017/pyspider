@@ -5,11 +5,14 @@ from common.spider import AsyncSpider
 
 
 class ExampleSpider(AsyncSpider):
+    proxy = 'pinzan'
+
     def __init__(self, logger=None) -> None:
         super().__init__(logger=logger)
+        print(self.__class__.proxy)
 
     @staticmethod
-    def make_headers():
+    def make_headers(page):
         headers = {
             'authority': 'xiapi.xiapibuy.com',
             'pragma': 'no-cache',
@@ -25,7 +28,7 @@ class ExampleSpider(AsyncSpider):
             'sec-fetch-mode': 'cors',
             'sec-fetch-dest': 'empty',
             'referer':
-            'https://xiapi.xiapibuy.com/search?keyword=%E6%87%B6%E4%BA%BA%E6%B2%99%E7%99%BC&page=1',
+            f'https://xiapi.xiapibuy.com/search?keyword=%E6%87%B6%E4%BA%BA%E6%B2%99%E7%99%BC&page={page}',
             'accept-language': 'zh-CN,zh;q=0.9',
         }
         return headers
@@ -36,13 +39,8 @@ class ExampleSpider(AsyncSpider):
             request_body[
                 'url'] = f'https://xiapi.xiapibuy.com/api/v2/search_items/?by=relevancy&keyword=%E6%87%B6%E4%BA%BA%E6%B2%99%E7%99%BC&limit=50&newest={int(page-1)* 50}&order=desc&page_type=search&version=2'
             request_body['method'] = 'GET'
-            request_body['headers'] = self.make_headers()
+            request_body['headers'] = self.make_headers(page)
             self.request_body_list.append(request_body)
-
-    # async def run(self):
-    #     self.make_request_body()
-    #     await self.request_producer()
-    #     await self.request_worker()
 
 
 async def main():
