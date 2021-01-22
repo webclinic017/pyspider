@@ -193,10 +193,14 @@ class KafkaClient:
         self.producer.send(topic, value, key=key).add_callback(
             self.on_send_success).add_errback(self.on_send_error)
 
-    def consume(self, *topics):
+    def consume(self, *topics, group_id=None):
         self.consumer.subscribe(topics)
+        if group_id:
+            self.consumer.config['group_id'] = group_id
         for msg in self.consumer:
+            self.consumer.poll(0)
             print(msg.value)
+            yield msg.value
 
     def on_send_success(self, record_metadata):
         self.logger.info('Message delivered to {} [{}]'.format(

@@ -39,7 +39,8 @@ mysql_test = {
 
 kafka_test = {
     'bootstrap_servers': ['localhost:9092'],
-    'value_serializer': lambda m: json.dumps(m).encode('utf8')
+    'value_serializer': lambda m: json.dumps(m).encode('utf8'),
+    'key_serializer': str.encode
 }
 
 REDIS_CONF = {
