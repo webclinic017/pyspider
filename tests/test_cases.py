@@ -10,9 +10,7 @@ from config.db_setup import RedisClient, MysqlClient, AioRedis, AioMysql
 
 async def fetch_page():
     async with AsyncSpider() as spider:
-        res = await spider.crawl("https://python.org",
-                                 return_type='text',
-                                 proxy_type='liebaoV1')
+        res = await spider.crawl("https://python.org", return_type='text')
         return res
 
 
