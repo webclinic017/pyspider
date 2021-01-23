@@ -173,9 +173,6 @@ class AsyncSpider:
     async def request_worker(self):
         while True:
             request_item = await self.request_queue.get()
-            if request_item is None:
-                print('111111')
-                return
             self.worker_tasks.append(request_item)
             if self.request_queue.empty():
                 results = await asyncio.gather(*self.worker_tasks,
@@ -183,14 +180,14 @@ class AsyncSpider:
                 # print(results)
                 # print(len(results))
                 self.worker_tasks = []
-                print('======')
-                yield results
-                # self.request_queue.task_done()
+                return results
+            self.request_queue.task_done()
 
     async def request_producer(self):
         for request_body in self.request_body_list:
             task = asyncio.create_task(self.crawl(**request_body))
             await self.request_queue.put(task)
+        # await self.request_queue.put(None)
 
     async def make_request_body(self):
         yield self.request_body()
@@ -199,9 +196,9 @@ class AsyncSpider:
         async for item in self.make_request_body():
             self.request_body_list.append(item._asdict())
         await self.request_producer()
-        async for results in self.request_worker():
-            # print(results)
-            print(len(results))
+        result = await self.request_worker()
+        print(result)
+
         # await self.request_queue.join()
 
         # return
