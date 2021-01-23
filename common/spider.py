@@ -2,6 +2,7 @@ import asyncio
 import logging
 import random
 import sys
+from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
 from json.decoder import JSONDecodeError
 
@@ -17,6 +18,11 @@ else:
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     except ImportError:
         pass
+
+RequestBody = namedtuple('requestBody',
+                         ['url', 'method', 'headers', 'params', 'data'],
+                         defaults=[None, 'GET', None, None, None])
+# request_body = RequestBody(None, 'GET', None, None, None)
 
 
 class AsyncSpider:
@@ -40,6 +46,7 @@ class AsyncSpider:
         self.request_body_list = []
         self.executor = ThreadPoolExecutor()
         self.worker_tasks = []
+        self.request_body = RequestBody
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [
@@ -50,8 +57,8 @@ class AsyncSpider:
         if ua_type == 'web':
             url = "http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa"
         try:
-            resp = await self.session.get(url)
-            res = await resp.json()
+            async with self.session.get(url) as resp:
+                res = await resp.json()
             ua = res['data']
             return ua
         except Exception as e:
@@ -66,7 +73,9 @@ class AsyncSpider:
         Returns:
             [str]: [proxy]
         """
-        assert proxy_type in {'pinzan', 'dubsix', '2808', 'liebaoV1'}
+        assert proxy_type in {'pinzan', 'dubsix', '2808', 'liebaoV1', ''}
+        if not proxy_type:
+            return ''
         url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
             proxy_type)
         for _ in range(self.retry_time):
@@ -116,7 +125,7 @@ class AsyncSpider:
                     await asyncio.sleep(self.delay)
                     res = await resp.text()
             except Exception as e:
-                self.logger.error(f'请求{url}出错:{e}')
+                self.logger.error(f'请求{url}出错:{repr(e)}')
             else:
                 if return_type == 'json':
                     try:
@@ -147,7 +156,7 @@ class AsyncSpider:
                 "can't get available random ua,will use the defult!")
         for _ in range(self.retry_time):
             proxy = await self.get_proxy(proxy_type=self.proxy)
-            if proxy:
+            if proxy or proxy == '':
                 res = await self._crawl(url,
                                         method=method,
                                         headers=headers,
@@ -161,24 +170,22 @@ class AsyncSpider:
             else:
                 self.logger.error("can't get proxy!")
 
-    # async def multiple_request(self, **kwargs):
-    #     result = await asyncio.gather(*[
-    #         asyncio.create_task(self.crawl(url, **kwargs)) for url in range(10)
-    #     ])
-    #     return result
-
     async def request_worker(self):
         while True:
             request_item = await self.request_queue.get()
+            if request_item is None:
+                print('111111')
+                return
             self.worker_tasks.append(request_item)
             if self.request_queue.empty():
                 results = await asyncio.gather(*self.worker_tasks,
                                                return_exceptions=True)
-                print(results)
-                print(len(results))
+                # print(results)
+                # print(len(results))
                 self.worker_tasks = []
-                return results
-            self.request_queue.task_done()
+                print('======')
+                yield results
+                # self.request_queue.task_done()
 
     async def request_producer(self):
         for request_body in self.request_body_list:
@@ -186,12 +193,20 @@ class AsyncSpider:
             await self.request_queue.put(task)
 
     async def make_request_body(self):
-        raise NotImplementedError
+        yield self.request_body()
 
     async def run(self):
-        await self.make_request_body()
+        async for item in self.make_request_body():
+            self.request_body_list.append(item._asdict())
         await self.request_producer()
-        await self.request_worker()
+        async for results in self.request_worker():
+            # print(results)
+            print(len(results))
+        # await self.request_queue.join()
+
+        # return
+        # results = await self.request_worker()
+        # print(len(results))
 
     # @staticmethod
     # async def cancel_all_tasks():

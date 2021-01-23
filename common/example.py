@@ -1,15 +1,15 @@
 import asyncio
 import sys
-sys.path.append('..')
-from common.spider import AsyncSpider
+# sys.path.append('..')
+from spider import AsyncSpider
 
 
 class ExampleSpider(AsyncSpider):
-    proxy = 'pinzan'
+    proxy = ''
 
     def __init__(self, logger=None) -> None:
         super().__init__(logger=logger)
-        print(self.__class__.proxy)
+        # print(self.__class__.proxy)
 
     @staticmethod
     def make_headers(page):
@@ -34,13 +34,13 @@ class ExampleSpider(AsyncSpider):
         return headers
 
     async def make_request_body(self):
-        for page in range(1, 100):
-            request_body = {}
-            request_body[
-                'url'] = f'https://xiapi.xiapibuy.com/api/v2/search_items/?by=relevancy&keyword=%E6%87%B6%E4%BA%BA%E6%B2%99%E7%99%BC&limit=50&newest={int(page-1)* 50}&order=desc&page_type=search&version=2'
-            request_body['method'] = 'GET'
-            request_body['headers'] = self.make_headers(page)
-            self.request_body_list.append(request_body)
+        for page in range(1, 3):
+            url = f'https://xiapi.xiapibuy.com/api/v2/search_items/?by=relevancy&keyword=%E6%87%B6%E4%BA%BA%E6%B2%99%E7%99%BC&limit=50&newest={int(page-1)* 50}&order=desc&page_type=search&version=2'
+            method = 'GET'
+            headers = self.make_headers(page)
+            request_body = self.request_body(url, method, headers)
+            # self.request_body_list.append(request_body)
+            yield request_body
 
 
 async def main():
