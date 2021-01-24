@@ -1,6 +1,6 @@
 import asyncio
 import sys
-# sys.path.append('..')
+sys.path.append('..')
 from spider import AsyncSpider
 
 
@@ -34,13 +34,16 @@ class ExampleSpider(AsyncSpider):
         return headers
 
     async def make_request_body(self):
-        for page in range(1, 3):
+        for page in range(2, 3):
             url = f'https://xiapi.xiapibuy.com/api/v2/search_items/?by=relevancy&keyword=%E6%87%B6%E4%BA%BA%E6%B2%99%E7%99%BC&limit=50&newest={int(page-1)* 50}&order=desc&page_type=search&version=2'
             method = 'GET'
             headers = self.make_headers(page)
-            request_body = self.request_body(url, method, headers)
+            request_body = self.RequestBody(url, method, headers)
             # self.request_body_list.append(request_body)
             yield request_body
+
+    def process_response(self, res):
+        print(type(res))
 
 
 async def main():
@@ -49,3 +52,4 @@ async def main():
 
 
 asyncio.run(main())
+# ExampleSpider.start()
