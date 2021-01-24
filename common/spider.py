@@ -1,13 +1,14 @@
 import asyncio
-from datetime import datetime
 import logging
 import random
 import sys
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from json.decoder import JSONDecodeError
 
 import aiohttp
+import async_timeout
 import ujson
 from aiohttp import ClientSession
 
@@ -30,12 +31,15 @@ class AsyncSpider:
     """
     retry_time = 3
     concurrency = 20
-    logger = None
     delay = 0.5
     proxy = 'liebaoV1'
     ua_type = 'web'
+    # 消费者数量
     worker_numbers = 2
     batch_num = 100
+    timeout = 5
+    failed_counts = 0
+    success_counts = 0
 
     def __init__(self, logger=None) -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
@@ -60,8 +64,9 @@ class AsyncSpider:
         if ua_type == 'web':
             url = "http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa"
         try:
-            async with self.session.get(url) as resp:
-                res = await resp.json()
+            async with async_timeout.timeout(self.timeout):
+                async with self.session.get(url) as resp:
+                    res = await resp.json()
             ua = res['data']
             return ua
         except Exception as e:
@@ -75,8 +80,9 @@ class AsyncSpider:
             proxy_type)
         for _ in range(self.retry_time):
             try:
-                async with self.session.request('GET', url) as res:
-                    result = await res.json()
+                async with async_timeout.timeout(self.timeout):
+                    async with self.session.request('GET', url) as res:
+                        result = await res.json()
             except Exception as e:
                 self.logger.error(f'获取代理出错：{e}')
             else:
@@ -150,9 +156,8 @@ class AsyncSpider:
             else:
                 self.logger.error("can't get proxy!")
 
-    @staticmethod
-    def process_response(res):
-        print(res)
+    def process_response(self, res):
+        self.logger.info(res)
 
     async def request_worker(self, is_gather=True):
         while True:
@@ -172,12 +177,15 @@ class AsyncSpider:
                     self.worker_tasks = []
                     for result in results:
                         if isinstance(result, (dict, str)):
+                            self.success_counts += 1
                             self.process_response(result)
+                        else:
+                            self.failed_counts += 1
             self.request_queue.task_done()
 
     async def request_producer(self):
         async for request_body in self.make_request_body():
-            task = asyncio.create_task(self.crawl(**request_body._asdict()))
+            task = asyncio.ensure_future(self.crawl(**request_body._asdict()))
             await self.request_queue.put(task)
         for _ in range(self.worker_numbers):
             await self.request_queue.put(None)
@@ -193,55 +201,39 @@ class AsyncSpider:
             for _ in range(self.worker_numbers)
         ]
         for worker in consumers:
-            print(f"Worker started: {id(worker)}")
+            self.logger.info(f"Worker started: {id(worker)}")
         await asyncio.wait(consumers)
         await self.request_queue.join()
         for worker in consumers:
             r = worker.cancelled()
-            print(r)
-
-    async def start_master(self):
-        """
-        Actually start crawling
-        """
-        # await self.request_producer()
-        producer = [asyncio.ensure_future(self.request_producer())]
-        workers = [
-            asyncio.ensure_future(self.request_worker())
-            for _ in range(self.worker_numbers)
-        ]
-        for worker in workers:
-            self.logger.info(f"Worker started: {id(worker)}")
-        await asyncio.wait(producer + workers)
-        await self.request_queue.join()
+            self.logger.info(r)
 
     async def _start(self):
         self.logger.info("Spider started!")
         start_time = datetime.now()
         try:
-            await self.start_master()
+            await self.run()
         finally:
             await self.session.close()
             # Display logs about this crawl task
             end_time = datetime.now()
-            # self.logger.info(
-            #     f"Total requests: {self.failed_counts + self.success_counts}")
+            self.logger.info(
+                f"Total requests: {self.failed_counts + self.success_counts}")
 
-            # if self.failed_counts:
-            #     self.logger.info(f"Failed requests: {self.failed_counts}")
-            print(f"Time usage: {end_time - start_time}")
+            if self.failed_counts:
+                self.logger.info(f"Failed requests: {self.failed_counts}")
+            self.logger.info(f"Time usage: {end_time - start_time}")
             self.logger.info("Spider finished!")
-            print('======')
 
     @classmethod
     def start(cls, logger=None):
         spider = cls(logger=logger)
-        if sys.version_info > (3, 6):
-            asyncio.run(spider._start())
-        else:
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(spider.run())
-            loop.close()
+        # if sys.version_info > (3, 6):
+        #     asyncio.run(spider._start())
+        # else:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(spider._start())
+        loop.close()
 
     @staticmethod
     async def cancel_all_tasks():
