@@ -196,6 +196,9 @@ class AsyncSpider:
             print(f"Worker started: {id(worker)}")
         await asyncio.wait(consumers)
         await self.request_queue.join()
+        for worker in consumers:
+            r = worker.cancelled()
+            print(r)
 
     async def start_master(self):
         """
