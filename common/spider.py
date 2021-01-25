@@ -36,7 +36,7 @@ class AsyncSpider:
     ua_type = 'web'
     # 消费者数量
     worker_numbers = 2
-    batch_num = 100
+    batch_num = 10
     timeout = 5
     failed_counts = 0
     success_counts = 0
@@ -163,13 +163,20 @@ class AsyncSpider:
             request_item = await self.request_queue.get()
             if not request_item:
                 self.request_queue.task_done()
-                return
+                break
             if not is_gather:
                 result = await request_item
-                self.process_response(result)
+                if isinstance(result, (dict, str)):
+                    self.success_counts += 1
+                    # self.process_response(result)
+                    await self.loop.run_in_executor(self.executor,
+                                                    self.process_response,
+                                                    result)
+                else:
+                    self.failed_counts += 1
             else:
                 self.worker_tasks.append(request_item)
-                if self.request_queue.qsize() == self.worker_numbers or len(
+                if self.request_queue.qsize() <= self.worker_numbers or len(
                         self.worker_tasks) == self.batch_num:
                     results = await asyncio.gather(*self.worker_tasks,
                                                    return_exceptions=True)
