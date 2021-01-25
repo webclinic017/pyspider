@@ -177,7 +177,9 @@ class AsyncSpider:
                     for result in results:
                         if isinstance(result, (dict, str)):
                             self.success_counts += 1
-                            self.process_response(result)
+                            # self.process_response(result)
+                            await self.loop.run_in_executor(
+                                self.executor, self.process_response, result)
                         else:
                             self.failed_counts += 1
             self.request_queue.task_done()
@@ -226,14 +228,16 @@ class AsyncSpider:
             self.logger.info("Spider finished!")
 
     @classmethod
-    def start(cls, logger=None):
+    def start(cls, logger=None, close_event_loop=True):
         spider = cls(logger=logger)
         # if sys.version_info > (3, 6):
         #     asyncio.run(spider._start())
         # else:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(spider._start())
-        loop.close()
+        if close_event_loop:
+            loop.close()
+        return spider
 
     @staticmethod
     async def cancel_all_tasks():
