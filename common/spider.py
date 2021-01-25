@@ -158,7 +158,7 @@ class AsyncSpider:
     def process_response(self, res):
         self.logger.info(res)
 
-    async def request_worker(self, is_gather=False):
+    async def request_worker(self, is_gather=True):
         while True:
             request_item = await self.request_queue.get()
             # if not request_item:
