@@ -196,19 +196,18 @@ class AsyncSpider:
 
     async def run(self):
         await self.request_producer()
-        # await self.request_worker()
         consumers = [
             asyncio.ensure_future(self.request_worker())
             for _ in range(self.worker_numbers)
         ]
-        for worker in consumers:
-            self.logger.info(f"Worker started: {id(worker)}")
-        await asyncio.wait(consumers)
+        for i, worker in enumerate(consumers):
+            self.logger.info(f"Worker{i} started: {id(worker)}")
+        # await asyncio.wait(consumers)
         await self.request_queue.join()
         for worker in consumers:
             worker.cancel()
             # self.logger.info(r)
-        await asyncio.gather(*consumers)
+        await asyncio.gather(*consumers, return_exceptions=True)
 
     async def _start(self):
         self.logger.info("Spider started!")
