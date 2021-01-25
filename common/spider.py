@@ -49,7 +49,7 @@ class AsyncSpider:
         else:
             self.logger = logging.getLogger(__name__)
             self.logger.setLevel(logging.DEBUG)
-        self.request_queue = asyncio.Queue(maxsize=1000)
+        self.request_queue = asyncio.Queue()
         self.executor = ThreadPoolExecutor()
         self.worker_tasks = []
         self.RequestBody = RequestBody
@@ -158,12 +158,12 @@ class AsyncSpider:
     def process_response(self, res):
         self.logger.info(res)
 
-    async def request_worker(self, is_gather=True):
+    async def request_worker(self, is_gather=False):
         while True:
             request_item = await self.request_queue.get()
-            if not request_item:
-                self.request_queue.task_done()
-                break
+            # if not request_item:
+            #     self.request_queue.task_done()
+            #     return
             if not is_gather:
                 result = await request_item
                 if isinstance(result, (dict, str)):
@@ -176,8 +176,7 @@ class AsyncSpider:
                     self.failed_counts += 1
             else:
                 self.worker_tasks.append(request_item)
-                if self.request_queue.qsize() <= self.worker_numbers or len(
-                        self.worker_tasks) == self.batch_num:
+                if self.request_queue.empty():
                     results = await asyncio.gather(*self.worker_tasks,
                                                    return_exceptions=True)
                     self.worker_tasks = []
@@ -195,20 +194,20 @@ class AsyncSpider:
         async for request_body in self.make_request_body():
             task = asyncio.ensure_future(self.crawl(**request_body._asdict()))
             await self.request_queue.put(task)
-        for _ in range(self.worker_numbers):
-            await self.request_queue.put(None)
+        # for _ in range(self.worker_numbers):
+        #     await self.request_queue.put(None)
 
     async def make_request_body(self):
         yield self.RequestBody()
 
     async def run(self):
-        await self.request_producer()
         consumers = [
             asyncio.ensure_future(self.request_worker())
             for _ in range(self.worker_numbers)
         ]
         for i, worker in enumerate(consumers):
             self.logger.info(f"Worker{i} started: {id(worker)}")
+        await self.request_producer()
         # await asyncio.wait(consumers)
         await self.request_queue.join()
         for worker in consumers:
