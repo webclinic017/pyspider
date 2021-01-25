@@ -214,7 +214,7 @@ class AsyncSpider:
         try:
             await self.run()
         finally:
-            await self.session.close()
+            await self.close()
             # Display logs about this crawl task
             end_time = datetime.now()
             self.logger.info(
