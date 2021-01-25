@@ -1,5 +1,5 @@
 import sys
-sys.path.append('..')
+sys.path.append('C:\\Users\\Ety\\Desktop\\my_spider')
 from common.spider import AsyncSpider
 from utils.log import get_logger
 
@@ -8,6 +8,8 @@ logger = get_logger('example_spider')
 
 class ExampleSpider(AsyncSpider):
     proxy = 'liebaoV1'
+    worker_numbers = 10
+    delay = 1
 
     def __init__(self, logger=None) -> None:
         super().__init__(logger=logger)
