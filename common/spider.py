@@ -70,7 +70,7 @@ class AsyncSpider:
             ua = res['data']
             return ua
         except Exception as e:
-            self.logger.error(f"获取ua出错：{e}")
+            self.logger.error(f"获取ua出错：{repr(e)}")
 
     async def get_proxy(self, proxy_type='pinzan'):
         assert proxy_type in {'pinzan', 'dubsix', '2808', 'liebaoV1', ''}
@@ -84,7 +84,7 @@ class AsyncSpider:
                     async with self.session.request('GET', url) as res:
                         result = await res.json()
             except Exception as e:
-                self.logger.error(f'获取代理出错：{e}')
+                self.logger.error(f'获取代理出错：{repr(e)}')
             else:
                 proxy = result.get('data')
                 if proxy:
@@ -97,19 +97,20 @@ class AsyncSpider:
                      proxy=None,
                      data=None,
                      params=None,
-                     timeout=5,
                      return_type='json'):
         async with self.sem:
             try:
-                async with self.session.request(method,
-                                                url,
-                                                headers=headers,
-                                                proxy=proxy,
-                                                data=data,
-                                                params=params,
-                                                timeout=timeout) as resp:
-                    await asyncio.sleep(self.delay)
-                    res = await resp.text()
+                async with async_timeout.timeout(self.timeout):
+                    async with self.session.request(method,
+                                                    url,
+                                                    headers=headers,
+                                                    proxy=proxy,
+                                                    data=data,
+                                                    params=params) as resp:
+                        await asyncio.sleep(self.delay)
+                        res = await resp.text()
+            except aiohttp.ClientHttpProxyError as e:
+                self.logger.error(f'代理出错：{repr(e)}')
             except Exception as e:
                 self.logger.error(f'请求{url}出错:{repr(e)}')
             else:
@@ -126,8 +127,7 @@ class AsyncSpider:
                     method='GET',
                     data=None,
                     params=None,
-                    return_type='json',
-                    timeout=5):
+                    return_type='json'):
         if not url:
             raise Exception("url must not be None!")
         ua = await self.get_ua(ua_type=self.ua_type)
@@ -149,8 +149,7 @@ class AsyncSpider:
                                         proxy=proxy,
                                         data=data,
                                         params=params,
-                                        return_type=return_type,
-                                        timeout=timeout)
+                                        return_type=return_type)
                 if res:
                     return res
             else:
@@ -191,7 +190,7 @@ class AsyncSpider:
             await self.request_queue.put(None)
 
     async def make_request_body(self):
-        yield self.request_body()
+        yield self.RequestBody()
 
     async def run(self):
         await self.request_producer()
@@ -205,8 +204,9 @@ class AsyncSpider:
         await asyncio.wait(consumers)
         await self.request_queue.join()
         for worker in consumers:
-            r = worker.cancelled()
-            self.logger.info(r)
+            worker.cancel()
+            # self.logger.info(r)
+        await asyncio.gather(*consumers)
 
     async def _start(self):
         self.logger.info("Spider started!")
