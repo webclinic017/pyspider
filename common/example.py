@@ -1,14 +1,13 @@
-import asyncio
 import sys
 sys.path.append('..')
-from spider import AsyncSpider
+from common.spider import AsyncSpider
 from utils.log import get_logger
 
 logger = get_logger('example_spider')
 
 
 class ExampleSpider(AsyncSpider):
-    proxy = ''
+    proxy = 'liebaoV1'
 
     def __init__(self, logger=None) -> None:
         super().__init__(logger=logger)
@@ -37,7 +36,7 @@ class ExampleSpider(AsyncSpider):
         return headers
 
     async def make_request_body(self):
-        for page in range(2, 5):
+        for page in range(1, 100):
             url = f'https://xiapi.xiapibuy.com/api/v2/search_items/?by=relevancy&keyword=%E6%87%B6%E4%BA%BA%E6%B2%99%E7%99%BC&limit=50&newest={int(page-1)* 50}&order=desc&page_type=search&version=2'
             method = 'GET'
             headers = self.make_headers(page)
