@@ -155,8 +155,17 @@ class AsyncSpider:
             else:
                 self.logger.error("can't get proxy!")
 
-    def process_response(self, res):
-        self.logger.info(res)
+    def parse(self, response):
+        """
+        解析response
+        """
+        print(response)
+
+    def process_item(self, item):
+        """
+        保存数据操作
+        """
+        pass
 
     async def request_worker(self, is_gather=True):
         while True:
@@ -169,8 +178,7 @@ class AsyncSpider:
                 if isinstance(result, (dict, str)):
                     self.success_counts += 1
                     # self.process_response(result)
-                    await self.loop.run_in_executor(self.executor,
-                                                    self.process_response,
+                    await self.loop.run_in_executor(self.executor, self.parse,
                                                     result)
                 else:
                     self.failed_counts += 1
@@ -185,7 +193,7 @@ class AsyncSpider:
                             self.success_counts += 1
                             # self.process_response(result)
                             await self.loop.run_in_executor(
-                                self.executor, self.process_response, result)
+                                self.executor, self.parse, result)
                         else:
                             self.failed_counts += 1
             self.request_queue.task_done()
