@@ -6,6 +6,7 @@ from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from json.decoder import JSONDecodeError
+from typing import Awaitable
 
 import aiohttp
 import async_timeout
@@ -90,14 +91,14 @@ class AsyncSpider:
                 if proxy:
                     return 'http://' + proxy
 
-    async def _crawl(self,
-                     url,
-                     method='GET',
-                     headers=None,
-                     proxy=None,
-                     data=None,
-                     params=None,
-                     return_type='json'):
+    async def _request(self,
+                       url,
+                       method='GET',
+                       headers=None,
+                       proxy=None,
+                       data=None,
+                       params=None,
+                       return_type='json'):
         async with self.sem:
             try:
                 async with async_timeout.timeout(self.timeout):
@@ -121,13 +122,13 @@ class AsyncSpider:
                         self.logger.error(e)
                 return res
 
-    async def crawl(self,
-                    url=None,
-                    headers=None,
-                    method='GET',
-                    data=None,
-                    params=None,
-                    return_type='json'):
+    async def request(self,
+                      url=None,
+                      headers=None,
+                      method='GET',
+                      data=None,
+                      params=None,
+                      return_type='json'):
         if not url:
             raise Exception("url must not be None!")
         ua = await self.get_ua(ua_type=self.ua_type)
@@ -143,13 +144,13 @@ class AsyncSpider:
         for _ in range(self.retry_time):
             proxy = await self.get_proxy(proxy_type=self.proxy)
             if proxy or proxy == '':
-                res = await self._crawl(url,
-                                        method=method,
-                                        headers=headers,
-                                        proxy=proxy,
-                                        data=data,
-                                        params=params,
-                                        return_type=return_type)
+                res = await self._request(url,
+                                          method=method,
+                                          headers=headers,
+                                          proxy=proxy,
+                                          data=data,
+                                          params=params,
+                                          return_type=return_type)
                 if res:
                     return res
             else:
@@ -173,34 +174,49 @@ class AsyncSpider:
             # if not request_item:
             #     self.request_queue.task_done()
             #     return
-            if not is_gather:
-                result = await request_item
-                if isinstance(result, (dict, str)):
+            if isinstance(request_item, Awaitable):
+                if not is_gather:
+                    result = await request_item
+                    if isinstance(result, (dict, str)):
+                        self.success_counts += 1
+                        # self.process_response(result)
+                        await self.loop.run_in_executor(
+                            self.executor, self.parse, result)
+                    else:
+                        self.failed_counts += 1
+                else:
+                    self.worker_tasks.append(request_item)
+                    if self.request_queue.empty():
+                        results = await asyncio.gather(*self.worker_tasks,
+                                                       return_exceptions=True)
+                        self.worker_tasks = []
+                        for result in results:
+                            if isinstance(result, (dict, str)):
+                                self.success_counts += 1
+                                # self.process_response(result)
+                                await self.loop.run_in_executor(
+                                    self.executor, self.parse, result)
+                            else:
+                                self.failed_counts += 1
+            else:
+                if isinstance(request_item, (dict, str)):
                     self.success_counts += 1
                     # self.process_response(result)
                     await self.loop.run_in_executor(self.executor, self.parse,
-                                                    result)
+                                                    request_item)
                 else:
                     self.failed_counts += 1
-            else:
-                self.worker_tasks.append(request_item)
-                if self.request_queue.empty():
-                    results = await asyncio.gather(*self.worker_tasks,
-                                                   return_exceptions=True)
-                    self.worker_tasks = []
-                    for result in results:
-                        if isinstance(result, (dict, str)):
-                            self.success_counts += 1
-                            # self.process_response(result)
-                            await self.loop.run_in_executor(
-                                self.executor, self.parse, result)
-                        else:
-                            self.failed_counts += 1
+
             self.request_queue.task_done()
 
     async def request_producer(self):
         async for request_body in self.make_request_body():
-            task = asyncio.ensure_future(self.crawl(**request_body._asdict()))
+            task = None
+            if isinstance(request_body, RequestBody):
+                task = asyncio.ensure_future(
+                    self.request(**request_body._asdict()))
+            elif isinstance(request_body, (dict, str)) or request_body == None:
+                task = request_body
             await self.request_queue.put(task)
         # for _ in range(self.worker_numbers):
         #     await self.request_queue.put(None)
