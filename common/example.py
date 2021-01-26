@@ -40,11 +40,11 @@ class ExampleSpider(AsyncSpider):
             'zYfkZcb', 'hxiESSw', 'lVKMfKy', 'qIvUBNX', 'PAZfwKy'
         ]
         for shop_id in shop_list:
-            for page in range(20):
+            for page in range(30):
                 url = f'https://ec.snssdk.com/shop/goodsList?shop_id={shop_id}&size=10&page={page}&b_type_new=0&device_id=0&is_outside=1'
                 method = 'GET'
                 headers = self.make_headers()
-                yield self.RequestBody(url, method,headers)
+                yield self.RequestBody(url, method, headers)
                 # if isinstance(res, dict):
                 #     if res['data'].get('list'):
                 #         page += 1
@@ -52,7 +52,7 @@ class ExampleSpider(AsyncSpider):
                 #         break
 
     def parse(self, res):
-        print((res))
+        logger.info((res))
 
 
 # async def main():

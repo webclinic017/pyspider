@@ -23,6 +23,6 @@ def get_logger(file_name, log_dir='D:\\logs'):
     handler = logging.handlers.RotatingFileHandler(log_file,
                                                    maxBytes=1024 * 1024)
     handler.setFormatter(formatter)
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(logging.ERROR)
     logger.addHandler(handler)
     return logger
