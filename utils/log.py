@@ -3,15 +3,7 @@ import os
 import logging.handlers
 
 
-def get_logger(file_name):
-    """获取日志记录器
-
-    Args:
-        file_name (str): [记录日志的文件名]
-
-    Returns:
-        [obj]: [logger对象]
-    """
+def get_logger(file_name, log_dir='D:\\logs'):
     logger = logging.getLogger(file_name)
     if not file_name.endswith('.log'):
         file_name = file_name + '.log'
@@ -25,7 +17,6 @@ def get_logger(file_name):
     # add formatter to ch
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-    log_dir = 'D:\\logs'
     if not os.path.exists(log_dir):
         os.mkdir(log_dir)
     log_file = os.path.join(log_dir, file_name)
