@@ -12,6 +12,7 @@ import aiohttp
 import async_timeout
 import ujson
 from aiohttp import ClientSession
+from config import RedisClient
 
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -22,7 +23,7 @@ else:
     except ImportError:
         pass
 
-RequestBody = namedtuple('requestBody',
+RequestBody = namedtuple('RequestBody',
                          ['url', 'method', 'headers', 'params', 'data'],
                          defaults=[None, 'GET', None, None, None])
 
@@ -42,7 +43,7 @@ class AsyncSpider:
     failed_counts = 0
     success_counts = 0
 
-    def __init__(self, logger=None) -> None:
+    def __init__(self, logger=None, env='test') -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.sem = asyncio.Semaphore(self.concurrency)
         if logger:
@@ -55,6 +56,7 @@ class AsyncSpider:
         self.worker_tasks = []
         self.RequestBody = RequestBody
         self.loop = asyncio.get_event_loop()
+        self.redis_client = RedisClient(env)
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [
