@@ -11,7 +11,7 @@ class ExampleSpider(AsyncSpider):
     proxy = 'liebaoV1'
     worker_numbers = 3
     delay = random.uniform(0, 1)
-    concurrency = 32
+    concurrency = 16
 
     def __init__(self, logger=None) -> None:
         super().__init__(logger=logger)
