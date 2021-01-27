@@ -26,3 +26,7 @@ def get_logger(file_name, log_dir='D:\\logs'):
     handler.setLevel(logging.ERROR)
     logger.addHandler(handler)
     return logger
+
+
+async def get_async_logger():
+    pass
