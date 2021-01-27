@@ -32,7 +32,7 @@ class AsyncSpider:
     """
     retry_time = 3
     concurrency = 20
-    delay = 0.5
+    delay = random.uniform(0, 1)
     proxy = 'liebaoV1'
     ua_type = 'web'
     # 消费者数量
