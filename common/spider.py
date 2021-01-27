@@ -220,6 +220,7 @@ class AsyncSpider:
             await self.request_queue.put(task)
         # for _ in range(self.worker_numbers):
         #     await self.request_queue.put(None)
+        await self.request_queue.join()
 
     async def make_request_body(self):
         yield self.RequestBody()
@@ -233,7 +234,6 @@ class AsyncSpider:
             self.logger.info(f"Worker{i} started: {id(worker)}")
         await self.request_producer()
         # await asyncio.wait(consumers)
-        await self.request_queue.join()
         for worker in consumers:
             worker.cancel()
             # self.logger.info(r)
