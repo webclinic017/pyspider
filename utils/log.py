@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 import logging.handlers
@@ -6,7 +7,7 @@ import logging.handlers
 def get_logger(file_name, log_dir='D:\\logs'):
     logger = logging.getLogger(file_name)
     if not file_name.endswith('.log'):
-        file_name = file_name + '.log'
+        file_name = file_name + ':' + str(datetime.date.today()) + '.log'
     logger.setLevel(logging.DEBUG)
     # create console handler and set level to debug
     ch = logging.StreamHandler()
