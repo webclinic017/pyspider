@@ -215,7 +215,7 @@ class AsyncSpider:
             if isinstance(request_body, RequestBody):
                 task = asyncio.ensure_future(
                     self.request(**request_body._asdict()))
-            elif isinstance(request_body, (dict, str)) or request_body == None:
+            elif isinstance(request_body, (dict, str)) or request_body is None:
                 task = request_body
             await self.request_queue.put(task)
         # for _ in range(self.worker_numbers):
