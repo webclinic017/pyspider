@@ -33,13 +33,12 @@ class ExampleSpider(AsyncSpider):
         return headers
 
     async def make_request_body(self):
-        page = 1
         shop_list = [
             'aDpceDB', 'JIBMdzz', 'QqkdRkd', 'JlLHLNH', 'wxATQZg', 'zYfkZcb',
             'zYfkZcb', 'hxiESSw', 'lVKMfKy', 'qIvUBNX', 'PAZfwKy'
         ]
         for shop_id in shop_list:
-            for page in range(5):
+            for page in range(10):
                 url = f'https://ec.snssdk.com/shop/goodsList?shop_id={shop_id}&size=10&page={page}&b_type_new=0&device_id=0&is_outside=1'
                 method = 'GET'
                 headers = self.make_headers()
@@ -51,7 +50,7 @@ class ExampleSpider(AsyncSpider):
                 #         break
 
     def parse(self, res):
-        logger.info(type(res))
+        logger.info((res))
         self.redis_client.lpush('mytest', json.dumps(res))
 
 
