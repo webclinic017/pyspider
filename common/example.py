@@ -1,4 +1,4 @@
-import random
+import json
 import sys
 sys.path.append('C:\\Users\\Ety\\Desktop\\my_spider')
 from common.spider import AsyncSpider
@@ -9,7 +9,7 @@ logger = get_logger('example_spider')
 
 class ExampleSpider(AsyncSpider):
     proxy = 'liebaoV1'
-    worker_numbers = 3
+    worker_numbers = 4
     concurrency = 16
 
     def __init__(self, logger=None) -> None:
@@ -39,7 +39,7 @@ class ExampleSpider(AsyncSpider):
             'zYfkZcb', 'hxiESSw', 'lVKMfKy', 'qIvUBNX', 'PAZfwKy'
         ]
         for shop_id in shop_list:
-            for page in range(30):
+            for page in range(5):
                 url = f'https://ec.snssdk.com/shop/goodsList?shop_id={shop_id}&size=10&page={page}&b_type_new=0&device_id=0&is_outside=1'
                 method = 'GET'
                 headers = self.make_headers()
@@ -51,7 +51,8 @@ class ExampleSpider(AsyncSpider):
                 #         break
 
     def parse(self, res):
-        logger.info((res))
+        logger.info(type(res))
+        self.redis_client.lpush('mytest', json.dumps(res))
 
 
 # async def main():
