@@ -13,6 +13,7 @@ import async_timeout
 import ujson
 from aiohttp import ClientSession
 from config import RedisClient
+from utils.tools import LazyProperty
 
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -56,7 +57,14 @@ class AsyncSpider:
         self.worker_tasks = []
         self.RequestBody = RequestBody
         self.loop = asyncio.get_event_loop()
-        self.redis_client = RedisClient(env)
+        self.env = env
+        self._redis_client = None
+
+    @LazyProperty
+    def redis_client(self):
+        print(f'initialing self._redis_client which is:{self._redis_client}')
+        self._redis_client = RedisClient(self.env)
+        return self._redis_client
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [

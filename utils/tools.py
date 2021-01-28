@@ -49,3 +49,22 @@ def arg_to_iter(arg):
 def gen_random_str(length):
     return "".join(
         random.sample(string.ascii_lowercase + string.digits, length))
+
+
+class LazyProperty:
+    """
+    延迟加载属性初始化
+    """
+    def __init__(self, method):
+        self.method = method
+        self.method_name = method.__name__
+        print(f'function overridden:{self.method}')
+        print(f'function name:{self.method_name}')
+
+    def __get__(self, obj, cls):
+        if not obj:
+            return None
+        value = self.method(obj)
+        print(f'value:{value}')
+        setattr(obj, self.method_name, value)
+        return value
