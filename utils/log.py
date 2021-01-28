@@ -14,7 +14,7 @@ def get_logger(file_name, log_dir='D:\\logs'):
     ch.setLevel(logging.DEBUG)
     # create formatter
     formatter = logging.Formatter(
-        '%(asctime)s %(levelname)s %(filename)s %(lineno)s %(message)s')
+        '[%(asctime)s] %(levelname)s %(filename)s %(lineno)s %(message)s')
     # add formatter to ch
     ch.setFormatter(formatter)
     logger.addHandler(ch)

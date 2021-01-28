@@ -244,10 +244,11 @@ class AsyncSpider:
             self.logger.info(f"Worker{i} started: {id(worker)}")
         await self.request_producer()
         # await asyncio.wait(consumers)
-        for worker in consumers:
-            worker.cancel()
-            # self.logger.info(r)
-        await asyncio.gather(*consumers, return_exceptions=True)
+        # for worker in consumers:
+        #     worker.cancel()
+        # self.logger.info(r)
+        # await asyncio.gather(*consumers, return_exceptions=True)
+        await self.stop()
 
     async def _start(self):
         self.logger.info("Spider started!")
@@ -291,7 +292,7 @@ class AsyncSpider:
                 task.cancel()
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def stop(self, _signal):
+    async def stop(self, _signal=None):
         """
         Finish all running tasks, cancel remaining tasks.
         :param _signal:
