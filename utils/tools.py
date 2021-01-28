@@ -53,7 +53,7 @@ def gen_random_str(length):
 
 class LazyProperty:
     """
-    延迟加载属性初始化
+    延迟加载实例属性,只会在第一次调用时才会初始化
     """
     def __init__(self, method):
         self.method = method

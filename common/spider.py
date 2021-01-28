@@ -62,8 +62,8 @@ class AsyncSpider:
 
     @LazyProperty
     def redis_client(self):
-        print(f'initialing self._redis_client which is:{self._redis_client}')
         self._redis_client = RedisClient(self.env)
+        self.logger.info(f'initialing {repr(self._redis_client)} success!')
         return self._redis_client
 
     async def get_ua(self, ua_type="mobile"):
