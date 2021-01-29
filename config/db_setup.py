@@ -152,6 +152,7 @@ class AioMysql:
         self.env = env
         self.conn = None
         self.cursor = None
+        self.pool = None
 
     async def setup(self):
         self.pool = await aiomysql.create_pool(**MYSQL_CONF[self.env])
