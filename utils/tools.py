@@ -96,3 +96,6 @@ class FrozenJson:
             return getattr(self._data, name)
         else:
             return FrozenJson(self._data.get(name))
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        setattr(self._data, name, value)
