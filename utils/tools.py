@@ -1,7 +1,9 @@
 import random
 import re
 import string
-
+from collections.abc import Mapping, MutableSequence
+import keyword
+from typing import Any
 _ITERABLE_SINGLE_VALUES = dict, str, bytes
 
 
@@ -68,3 +70,29 @@ class LazyProperty:
         print(f'value:{value}')
         setattr(obj, self.method_name, value)
         return value
+
+
+class FrozenJson:
+    """
+    使用属性表示法访问json对象
+    """
+    def __new__(cls, arg) -> Any:
+        if isinstance(arg, Mapping):
+            return super().__new__(cls)
+        elif isinstance(arg, MutableSequence):
+            return [cls(item) for item in arg]
+        else:
+            return arg
+
+    def __init__(self, mapping) -> None:
+        self._data = {}
+        for key, value in mapping.items():
+            if keyword.iskeyword(key):
+                key += '_'
+            self._data[key] = value
+
+    def __getattr__(self, name):
+        if hasattr(self._data, name):
+            return getattr(self._data, name)
+        else:
+            return FrozenJson(self._data.get(name))
