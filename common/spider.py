@@ -43,6 +43,7 @@ class AsyncSpider:
     timeout = 5
     failed_counts = 0
     success_counts = 0
+    key = None
 
     def __init__(self, logger=None, env='test') -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
@@ -57,14 +58,15 @@ class AsyncSpider:
         self.worker_tasks = []
         self.RequestBody = RequestBody
         self.loop = asyncio.get_event_loop()
-        self.env = env
-        self._redis_client = None
+        # self.env = env
+        if env:
+            self.redis_client = RedisClient(env)
 
-    @LazyProperty
-    def redis_client(self):
-        self._redis_client = RedisClient(self.env)
-        self.logger.info(f'initialing {repr(self._redis_client)} success!')
-        return self._redis_client
+    # @LazyProperty
+    # def redis_client(self):
+    #     self._redis_client = RedisClient(self.env)
+    #     self.logger.info(f'initialing {repr(self._redis_client)} success!')
+    #     return self._redis_client
 
     async def get_ua(self, ua_type="mobile"):
         random_ua_links = [
@@ -171,12 +173,18 @@ class AsyncSpider:
         解析response
         """
         print(response)
+        return response
 
-    def process_item(self, item):
+    def process_response(self, response):
         """
         保存数据操作
         """
-        pass
+        res = self.parse(response)
+        if self.key:
+            self.redis_client.lpush(
+                self.key,
+                ujson.dumps(res, ensure_ascii=False),
+            )
 
     async def request_worker(self, is_gather=True):
         while True:
@@ -191,7 +199,7 @@ class AsyncSpider:
                         self.success_counts += 1
                         # self.process_response(result)
                         await self.loop.run_in_executor(
-                            self.executor, self.parse, result)
+                            self.executor, self.process_response, result)
                     else:
                         self.failed_counts += 1
                 else:
@@ -205,14 +213,16 @@ class AsyncSpider:
                                 self.success_counts += 1
                                 # self.process_response(result)
                                 await self.loop.run_in_executor(
-                                    self.executor, self.parse, result)
+                                    self.executor, self.process_response,
+                                    result)
                             else:
                                 self.failed_counts += 1
             else:
                 if isinstance(request_item, (dict, str)):
                     self.success_counts += 1
                     # self.process_response(result)
-                    await self.loop.run_in_executor(self.executor, self.parse,
+                    await self.loop.run_in_executor(self.executor,
+                                                    self.process_response,
                                                     request_item)
                 else:
                     self.failed_counts += 1
