@@ -6,7 +6,7 @@ from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from json.decoder import JSONDecodeError
-from typing import Awaitable
+from typing import Any, Awaitable, Dict, NamedTuple
 
 import aiohttp
 import async_timeout
@@ -24,9 +24,13 @@ else:
     except ImportError:
         pass
 
-RequestBody = namedtuple('RequestBody',
-                         ['url', 'method', 'headers', 'params', 'data'],
-                         defaults=[None, 'GET', None, None, None])
+
+class RequestBody(NamedTuple):
+    url: str
+    method: str = 'GET'
+    headers: Dict[str, Any] = {}
+    params: Any = None
+    data: Any = None
 
 
 class AsyncSpider:
@@ -36,7 +40,7 @@ class AsyncSpider:
     concurrency = 20
     delay = random.uniform(0, 1)
     proxy = 'liebaoV1'
-    ua_type = 'web'
+    ua_type = 'mobile'
     # 消费者数量
     worker_numbers = 2
     batch_num = 10
@@ -243,7 +247,7 @@ class AsyncSpider:
         await self.request_queue.join()
 
     async def make_request_body(self):
-        yield self.RequestBody()
+        yield self.RequestBody('https://pyhton.org')
 
     async def run(self):
         consumers = [
