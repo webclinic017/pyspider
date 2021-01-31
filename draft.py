@@ -1,11 +1,13 @@
-import asyncio
-from tqdm.asyncio import tqdm
+from typing import Any, NamedTuple,Dict
 
 
-async def funcname():
-    with tqdm(range(1000)) as pbar:
-        async for i in pbar:
-            i=i+1
+class RequestBody(NamedTuple):
+    url: str
+    method: str = 'GET'
+    headers: Dict[str, Any] = {'Content-Type': 'JSON'}
+    params: Any = None
+    data: Any = None
 
 
-asyncio.run(funcname())
+a = RequestBody('a')
+print(a._asdict())
