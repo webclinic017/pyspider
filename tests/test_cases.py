@@ -1,8 +1,6 @@
 import asyncio
 import sys
 import os
-import pytest
-import pytest_asyncio
 sys.path.append(os.pardir)
 from common.spider import AsyncSpider
 from config.db_setup import RedisClient, MysqlClient, AioRedis, AioMysql
@@ -10,7 +8,7 @@ from config.db_setup import RedisClient, MysqlClient, AioRedis, AioMysql
 
 async def fetch_page():
     async with AsyncSpider() as spider:
-        res = await spider.crawl("https://python.org", return_type='text')
+        res = await spider.request("https://python.org", return_type='text')
         return res
 
 
