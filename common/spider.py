@@ -1,5 +1,5 @@
 import asyncio
-import logging
+import loguru
 import random
 import sys
 from collections import namedtuple
@@ -55,8 +55,7 @@ class AsyncSpider:
         if logger:
             self.logger = logger
         else:
-            self.logger = logging.getLogger(__name__)
-            self.logger.setLevel(logging.DEBUG)
+            self.logger = loguru.logger
         self.request_queue = asyncio.Queue()
         self.executor = ThreadPoolExecutor()
         self.worker_tasks = []

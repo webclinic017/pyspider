@@ -19,16 +19,18 @@ class RequestBody(NamedTuple):
 
 
 class Request:
-    def __init__(self,
-                 url,
-                 method='GET',
-                 headers=None,
-                 params=None,
-                 data=None,
-                 proxy=None,
-                 session=None,
-                 timeout=5,
-                 return_type='json') -> None:
+    def __init__(
+        self,
+        url,
+        method='GET',
+        headers=None,
+        params=None,
+        data=None,
+        proxy=None,
+        session=None,
+        timeout=5,
+        return_type='json',
+    ) -> None:
         self.close_request_session = False
         if not session:
             self.session = ClientSession(connector=TCPConnector(ssl=False))
@@ -78,7 +80,7 @@ class Request:
         data=None,
         proxy=None,
         session=None,
-        timeout=5,
+        timeout=20,
         return_type='json',
     ):
         res = await cls(url, method, headers, params, data, proxy, session,
@@ -87,5 +89,5 @@ class Request:
 
 
 aiorequest = Request.request
-res = asyncio.run(aiorequest('https://python.org', return_type='text'))
-print(res)
+# res = asyncio.run(aiorequest('https://python.org', return_type='text'))
+# print(res)
