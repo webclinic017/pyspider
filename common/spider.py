@@ -137,13 +137,15 @@ class AsyncSpider:
                         self.logger.error(e)
                 return res
 
-    async def request(self,
-                      url,
-                      headers=None,
-                      method='GET',
-                      data=None,
-                      params=None,
-                      return_type='json'):
+    async def request(
+        self,
+        url,
+        headers=None,
+        method='GET',
+        data=None,
+        params=None,
+        return_type='json',
+    ):
         ua = await self.get_ua(ua_type=self.ua_type)
         if not headers:
             headers = {}
