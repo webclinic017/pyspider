@@ -1,12 +1,22 @@
 import asyncio
+import sys
+from json import JSONDecodeError
 from typing import Any, NamedTuple
 
 import aiohttp
 import async_timeout
+import ujson
 from aiohttp import ClientSession, TCPConnector
 from loguru import logger
-import ujson
-from json import JSONDecodeError
+
+if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+else:
+    try:
+        import uvloop
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    except ImportError:
+        pass
 
 
 class RequestBody(NamedTuple):
@@ -87,7 +97,6 @@ class Request:
     ):
         res = await cls(url, method, headers, params, data, proxy, session,
                         timeout, return_type).fetch()
-        await asyncio.sleep(0.5)
         return res
 
 
