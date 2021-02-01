@@ -35,6 +35,8 @@ class Request:
         if not session:
             self.session = ClientSession(connector=TCPConnector(ssl=False))
             self.close_request_session = True
+        else:
+            self.session = session
         self.request_body = RequestBody(
             url,
             method,
@@ -85,9 +87,10 @@ class Request:
     ):
         res = await cls(url, method, headers, params, data, proxy, session,
                         timeout, return_type).fetch()
+        await asyncio.sleep(0.5)
         return res
 
 
 aiorequest = Request.request
-# res = asyncio.run(aiorequest('https://python.org', return_type='text'))
-# print(res)
+res = asyncio.run(aiorequest('http://python.org', return_type='text'))
+print(res)

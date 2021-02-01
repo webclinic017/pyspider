@@ -1,6 +1,6 @@
 import json
 import sys
-sys.path.append('C:\\Users\\Ety\\Desktop\\my_spider')
+sys.path.append('C:\\Users\\Ety\\Desktop\\pyspider')
 from common.spider import AsyncSpider
 from utils.log import get_logger
 
@@ -50,8 +50,9 @@ class ExampleSpider(AsyncSpider):
                 #         break
 
     def parse(self, res):
-        logger.info((res))
+        logger.info(res)
         self.redis_client.lpush('mytest', json.dumps(res))
+
 
 
 # async def main():
