@@ -42,10 +42,15 @@ class ExampleSpider(AsyncSpider):
                 url = f'https://ec.snssdk.com/shop/goodsList?shop_id={shop_id}&size=10&page={page}&b_type_new=0&device_id=0&is_outside=1'
                 method = 'GET'
                 headers = self.make_headers()
-                yield self.RequestBody(url, method, headers)
+                yield self.RequestBody(
+                    url,
+                    method,
+                    headers,
+                    callback=self.parse,
+                )
 
     def parse(self, res):
-        logger.info(res)
+        logger.info(type(res))
         # self.redis_client.lpush('mytest', json.dumps(res))
 
 

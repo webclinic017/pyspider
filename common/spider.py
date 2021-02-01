@@ -7,6 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from json.decoder import JSONDecodeError
 from typing import Any, Awaitable, Dict, NamedTuple
+from inspect import isawaitable, isfunction
 
 import aiohttp
 import async_timeout
@@ -32,6 +33,7 @@ class RequestBody(NamedTuple):
     headers: Dict[str, Any] = {}
     params: Any = None
     data: Any = None
+    callback: Any = None
 
 
 class AsyncSpider:
@@ -145,6 +147,7 @@ class AsyncSpider:
         data=None,
         params=None,
         return_type='json',
+        callback=None,
     ):
         ua = await self.get_ua(ua_type=self.ua_type)
         if not headers:
@@ -173,7 +176,18 @@ class AsyncSpider:
                     )
                     await asyncio.sleep(self.delay)
                     if res:
-                        return res
+                        if isawaitable(callback):
+                            result = await callback(res)
+                        elif isfunction(callback):
+                            result = await self.loop.run_in_executor(
+                                self.executor, callback, res)
+                        elif not callback:
+                            result = await self.loop.run_in_executor(
+                                self.executor, self.parse, res)
+                        else:
+                            result = res
+                        return result
+
             else:
                 self.logger.error("can't get proxy!")
 
@@ -181,18 +195,16 @@ class AsyncSpider:
         """
         解析response
         """
-        print(response)
         return response
 
-    def process_response(self, response):
+    def process_result(self, result):
         """
         保存数据操作
         """
-        res = self.parse(response)
         if self.key:
             self.redis_client.lpush(
                 self.key,
-                ujson.dumps(res, ensure_ascii=False),
+                ujson.dumps(result, ensure_ascii=False),
             )
 
     async def request_worker(self, is_gather=True):
@@ -206,9 +218,8 @@ class AsyncSpider:
                     result = await request_item
                     if isinstance(result, (dict, str)):
                         self.success_counts += 1
-                        # self.process_response(result)
                         await self.loop.run_in_executor(
-                            self.executor, self.process_response, result)
+                            self.executor, self.process_result, result)
                     else:
                         self.failed_counts += 1
                 else:
@@ -220,18 +231,15 @@ class AsyncSpider:
                         for result in results:
                             if isinstance(result, (dict, str)):
                                 self.success_counts += 1
-                                # self.process_response(result)
                                 await self.loop.run_in_executor(
-                                    self.executor, self.process_response,
-                                    result)
+                                    self.executor, self.process_result, result)
                             else:
                                 self.failed_counts += 1
             else:
                 if isinstance(request_item, (dict, str)):
                     self.success_counts += 1
-                    # self.process_response(result)
                     await self.loop.run_in_executor(self.executor,
-                                                    self.process_response,
+                                                    self.process_result,
                                                     request_item)
                 else:
                     self.failed_counts += 1
