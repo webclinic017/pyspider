@@ -12,10 +12,6 @@ class ExampleSpider(AsyncSpider):
     worker_numbers = 4
     concurrency = 16
 
-    def __init__(self, logger=None) -> None:
-        super().__init__(logger=logger)
-        # print(self.__class__.proxy)
-
     @staticmethod
     def make_headers():
         headers = {
@@ -50,7 +46,7 @@ class ExampleSpider(AsyncSpider):
                 )
 
     def parse(self, res):
-        logger.info(type(res))
+        self.logger.info(res)
         # self.redis_client.lpush('mytest', json.dumps(res))
 
 

@@ -1,20 +1,20 @@
 import asyncio
-import loguru
 import random
 import sys
-from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from inspect import isawaitable, ismethod
 from json.decoder import JSONDecodeError
 from typing import Any, Awaitable, Dict, NamedTuple
-from inspect import isawaitable, isfunction
 
 import aiohttp
 import async_timeout
+import loguru
 import ujson
 from aiohttp import ClientSession
 from config import RedisClient
 from utils.tools import LazyProperty
+
 from common.request import aiorequest
 
 if sys.platform == 'win32':
@@ -146,8 +146,8 @@ class AsyncSpider:
         method='GET',
         data=None,
         params=None,
-        return_type='json',
         callback=None,
+        return_type='json',
     ):
         ua = await self.get_ua(ua_type=self.ua_type)
         if not headers:
@@ -178,7 +178,7 @@ class AsyncSpider:
                     if res:
                         if isawaitable(callback):
                             result = await callback(res)
-                        elif isfunction(callback):
+                        elif ismethod(callback):
                             result = await self.loop.run_in_executor(
                                 self.executor, callback, res)
                         elif not callback:
