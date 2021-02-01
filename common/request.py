@@ -7,7 +7,7 @@ import aiohttp
 import async_timeout
 import ujson
 from aiohttp import ClientSession, TCPConnector
-from loguru import logger
+import loguru
 
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -40,6 +40,7 @@ class Request:
         session=None,
         timeout=5,
         return_type='json',
+        logger=None,
     ) -> None:
         self.close_request_session = False
         if not session:
@@ -57,6 +58,8 @@ class Request:
         )
         self.timeout = timeout
         self.return_type = return_type
+        self.url = url
+        self.logger = logger or loguru.logger
 
     async def fetch(self):
         try:
@@ -65,15 +68,15 @@ class Request:
                         **self.request_body._asdict()) as resp:
                     res = await resp.text()
         except aiohttp.ClientHttpProxyError as e:
-            logger.error(f'代理出错：{repr(e)}')
+            self.logger.error(f'代理出错：{repr(e)}')
         except Exception as e:
-            logger.error(f'请求出错:{repr(e)}')
+            self.logger.error(f'请求{self.url}出错:{repr(e)}')
         else:
             if self.return_type == 'json':
                 try:
                     return ujson.loads(res)
                 except JSONDecodeError as e:
-                    logger.error(e)
+                    self.logger.error(repr(e))
             return res
         finally:
             await self._close_request()
@@ -101,5 +104,3 @@ class Request:
 
 
 aiorequest = Request.request
-res = asyncio.run(aiorequest('http://python.org', return_type='text'))
-print(res)

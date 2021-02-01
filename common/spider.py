@@ -14,6 +14,7 @@ import ujson
 from aiohttp import ClientSession
 from config import RedisClient
 from utils.tools import LazyProperty
+from common.request import aiorequest
 
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -52,10 +53,7 @@ class AsyncSpider:
     def __init__(self, logger=None, env='test') -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.sem = asyncio.Semaphore(self.concurrency)
-        if logger:
-            self.logger = logger
-        else:
-            self.logger = loguru.logger
+        self.logger = logger or loguru.logger
         self.request_queue = asyncio.Queue()
         self.executor = ThreadPoolExecutor()
         self.worker_tasks = []
@@ -117,12 +115,14 @@ class AsyncSpider:
         async with self.sem:
             try:
                 async with async_timeout.timeout(self.timeout):
-                    async with self.session.request(method,
-                                                    url,
-                                                    headers=headers,
-                                                    proxy=proxy,
-                                                    data=data,
-                                                    params=params) as resp:
+                    async with self.session.request(
+                            method,
+                            url,
+                            headers=headers,
+                            proxy=proxy,
+                            data=data,
+                            params=params,
+                    ) as resp:
                         await asyncio.sleep(self.delay)
                         res = await resp.text()
             except aiohttp.ClientHttpProxyError as e:
@@ -138,14 +138,12 @@ class AsyncSpider:
                 return res
 
     async def request(self,
-                      url=None,
+                      url,
                       headers=None,
                       method='GET',
                       data=None,
                       params=None,
                       return_type='json'):
-        if not url:
-            raise Exception("url must not be None!")
         ua = await self.get_ua(ua_type=self.ua_type)
         if not headers:
             headers = {}
@@ -159,15 +157,21 @@ class AsyncSpider:
         for _ in range(self.retry_time):
             proxy = await self.get_proxy(proxy_type=self.proxy)
             if proxy or proxy == '':
-                res = await self._request(url,
-                                          method=method,
-                                          headers=headers,
-                                          proxy=proxy,
-                                          data=data,
-                                          params=params,
-                                          return_type=return_type)
-                if res:
-                    return res
+                async with self.sem:
+                    res = await aiorequest(
+                        url,
+                        method=method,
+                        headers=headers,
+                        proxy=proxy,
+                        data=data,
+                        params=params,
+                        timeout=self.timeout,
+                        session=self.session,
+                        return_type=return_type,
+                    )
+                    await asyncio.sleep(self.delay)
+                    if res:
+                        return res
             else:
                 self.logger.error("can't get proxy!")
 
@@ -281,12 +285,12 @@ class AsyncSpider:
             self.logger.info("Spider finished!")
 
     @classmethod
-    def start(cls, logger=None, close_event_loop=True):
+    def start(cls, logger=None, loop=None, close_event_loop=True):
         spider = cls(logger=logger)
         # if sys.version_info > (3, 6):
         #     asyncio.run(spider._start())
         # else:
-        loop = asyncio.get_event_loop()
+        loop = loop or asyncio.get_event_loop()
         loop.run_until_complete(spider._start())
         if close_event_loop:
             loop.close()

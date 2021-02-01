@@ -1,5 +1,5 @@
-from aiohttp import ClientSession
-import aiohttp
+from common.request import aiorequest
+
 ANTI_HOST = 'http://172.16.0.27:3030'
 
 
@@ -11,22 +11,16 @@ class PddParamsProducer:
             'User-Agent': base_ua,
         }
         self.timeout = 8
-        self.close_session = False
-        if session:
-            self.session = session
-        else:
-            self.session = ClientSession(connector=aiohttp.TCPConnector(
-                ssl=False))
-            self.close_session = True
+        self.session = session
 
     async def get_nano_fp(self):
         url = self.anti_v2_host + "/antiV2Nano"
-        res = await self.session.get(
-            url,
-            headers=self.headers,
-            timeout=self.timeout,
-        )
-        return res.text
+        res = await aiorequest(url,
+                               headers=self.headers,
+                               timeout=self.timeout,
+                               return_type='text',
+                               session=self.session)
+        return res
 
     async def get_anticontent(
         self,
@@ -47,9 +41,9 @@ class PddParamsProducer:
             'page': page,
             'screen': screen,
         }
-        res = await self.session.get(url, headers=self.headers, params=params)
-        return res.text
-
-    async def close_request_session(self):
-        if self.close_session:
-            await self.session.close()
+        res = await aiorequest(url,
+                               headers=self.headers,
+                               params=params,
+                               return_type='text',
+                               session=self.session)
+        return res

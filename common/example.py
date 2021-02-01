@@ -43,21 +43,10 @@ class ExampleSpider(AsyncSpider):
                 method = 'GET'
                 headers = self.make_headers()
                 yield self.RequestBody(url, method, headers)
-                # if isinstance(res, dict):
-                #     if res['data'].get('list'):
-                #         page += 1
-                #     else:
-                #         break
 
     def parse(self, res):
         logger.info(res)
-        self.redis_client.lpush('mytest', json.dumps(res))
+        # self.redis_client.lpush('mytest', json.dumps(res))
 
 
-
-# async def main():
-#     async with ExampleSpider() as spider:
-#         await spider._start()
-
-# asyncio.run(main())
 ExampleSpider.start(logger=logger)
