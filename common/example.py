@@ -10,7 +10,7 @@ logger = get_logger('example_spider')
 class ExampleSpider(AsyncSpider):
     proxy = 'liebaoV1'
     worker_numbers = 4
-    concurrency = 16
+    concurrency = 32
 
     @staticmethod
     def make_headers():
@@ -47,6 +47,7 @@ class ExampleSpider(AsyncSpider):
 
     def parse(self, res):
         self.logger.info(res)
+        return res
         # self.redis_client.lpush('mytest', json.dumps(res))
 
 
