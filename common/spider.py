@@ -175,7 +175,10 @@ class AsyncSpider:
                         return_type=return_type,
                     )
                     await asyncio.sleep(self.delay)
-                    if res:
+                    if not res:
+                        self.failed_counts += 1
+                    else:
+                        self.success_counts += 1
                         if isawaitable(callback):
                             result = await callback(res)
                         elif ismethod(callback):
@@ -230,11 +233,8 @@ class AsyncSpider:
                         self.worker_tasks = []
                         for result in results:
                             if isinstance(result, (dict, str)):
-                                self.success_counts += 1
                                 await self.loop.run_in_executor(
                                     self.executor, self.process_result, result)
-                            else:
-                                self.failed_counts += 1
             else:
                 if isinstance(request_item, (dict, str)):
                     self.success_counts += 1
