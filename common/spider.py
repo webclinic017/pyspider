@@ -107,39 +107,6 @@ class AsyncSpider:
                 if proxy:
                     return 'http://' + proxy
 
-    async def _request(self,
-                       url,
-                       method='GET',
-                       headers=None,
-                       proxy=None,
-                       data=None,
-                       params=None,
-                       return_type='json'):
-        async with self.sem:
-            try:
-                async with async_timeout.timeout(self.timeout):
-                    async with self.session.request(
-                            method,
-                            url,
-                            headers=headers,
-                            proxy=proxy,
-                            data=data,
-                            params=params,
-                    ) as resp:
-                        await asyncio.sleep(self.delay)
-                        res = await resp.text()
-            except aiohttp.ClientHttpProxyError as e:
-                self.logger.error(f'代理出错：{repr(e)}')
-            except Exception as e:
-                self.logger.error(f'请求{url}出错:{repr(e)}')
-            else:
-                if return_type == 'json':
-                    try:
-                        return ujson.loads(res)
-                    except JSONDecodeError as e:
-                        self.logger.error(e)
-                return res
-
     async def request(
         self,
         url,
@@ -148,7 +115,6 @@ class AsyncSpider:
         data=None,
         params=None,
         callback=None,
-        return_type='json',
     ):
         ua = await self.get_ua(ua_type=self.ua_type)
         if not headers:
@@ -173,7 +139,6 @@ class AsyncSpider:
                         params=params,
                         timeout=self.timeout,
                         session=self.session,
-                        return_type=return_type,
                     )
                     await asyncio.sleep(self.delay)
                     if not res:

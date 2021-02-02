@@ -19,6 +19,17 @@ else:
         pass
 
 
+class Response:
+    def __init__(self, text, ok, headers, status) -> None:
+        self.text = text
+        self.ok = ok
+        self.headers = dict(headers)
+        self.status = status
+
+    def json(self):
+        return ujson.loads(self.text)
+
+
 class RequestBody(NamedTuple):
     url: str
     method: str = 'GET'
@@ -39,7 +50,6 @@ class Request:
         proxy=None,
         session=None,
         timeout=5,
-        return_type='json',
         logger=None,
     ) -> None:
         self.close_request_session = False
@@ -57,7 +67,6 @@ class Request:
             proxy=proxy,
         )
         self.timeout = timeout
-        self.return_type = return_type
         self.url = url
         self.logger = logger or loguru.logger
 
@@ -66,17 +75,13 @@ class Request:
             async with async_timeout.timeout(self.timeout):
                 async with self.session.request(
                         **self.request_body._asdict()) as resp:
-                    res = await resp.text()
+                    result = await resp.text()
         except aiohttp.ClientHttpProxyError as e:
             self.logger.error(f'代理出错：{repr(e)}')
         except Exception as e:
             self.logger.error(f'请求{self.url}出错:{repr(e)}')
         else:
-            if self.return_type == 'json':
-                try:
-                    return ujson.loads(res)
-                except JSONDecodeError as e:
-                    self.logger.error(repr(e))
+            res = Response(result, resp.ok, resp.headers, resp.status)
             return res
         finally:
             await self._close_request()
@@ -96,10 +101,9 @@ class Request:
         proxy=None,
         session=None,
         timeout=20,
-        return_type='json',
     ):
         res = await cls(url, method, headers, params, data, proxy, session,
-                        timeout, return_type).fetch()
+                        timeout).fetch()
         return res
 
 
