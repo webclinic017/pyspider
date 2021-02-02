@@ -3,8 +3,9 @@ import random
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from inspect import isawaitable, ismethod
+from inspect import isawaitable, ismethod, isasyncgen, isgenerator
 from json.decoder import JSONDecodeError
+from types import AsyncGeneratorType
 from typing import Any, Awaitable, Dict, NamedTuple
 
 import aiohttp
@@ -184,15 +185,37 @@ class AsyncSpider:
                         elif ismethod(callback):
                             result = await self.loop.run_in_executor(
                                 self.executor, callback, res)
-                        elif not callback:
-                            result = await self.loop.run_in_executor(
-                                self.executor, self.parse, res)
                         else:
                             result = res
-                        return result
-
+                        return result, res
             else:
                 self.logger.error("can't get proxy!")
+
+    async def _process_async_callback(self, callback_results, response=None):
+        try:
+            if isasyncgen(callback_results):
+                async for callback_result in callback_results:
+                    if isinstance(callback_result, AsyncGeneratorType):
+                        await self._process_async_callback(callback_result)
+                    elif isinstance(callback_result, RequestBody):
+                        self.request_queue.put_nowait(
+                            self.create_task(callback_result))
+                    elif isinstance(callback_result, (dict, str)):
+                        # Process target item
+                        self.process_item(callback_result)
+            elif isgenerator(callback_results):
+                for callback_result in callback_results:
+                    if isinstance(callback_result, AsyncGeneratorType):
+                        await self._process_async_callback(callback_result)
+                    elif isinstance(callback_result, RequestBody):
+                        self.request_queue.put_nowait(
+                            self.create_task(callback_result))
+                    elif isinstance(callback_result, (dict, str)):
+                        # Process target item
+                        self.process_item(callback_result)
+
+        except Exception as e:
+            self.logger.exception(e)
 
     def parse(self, response):
         """
@@ -200,7 +223,7 @@ class AsyncSpider:
         """
         return response
 
-    def process_result(self, result):
+    def process_item(self, result):
         """
         保存数据操作
         """
@@ -222,7 +245,7 @@ class AsyncSpider:
                     if isinstance(result, (dict, str)):
                         self.success_counts += 1
                         await self.loop.run_in_executor(
-                            self.executor, self.process_result, result)
+                            self.executor, self.process_item, result)
                     else:
                         self.failed_counts += 1
                 else:
@@ -232,48 +255,51 @@ class AsyncSpider:
                                                        return_exceptions=True)
                         self.worker_tasks = []
                         for result in results:
-                            if isinstance(result, (dict, str)):
-                                await self.loop.run_in_executor(
-                                    self.executor, self.process_result, result)
+                            if not isinstance(result, RuntimeError) and result:
+                                callback_results, response = result
+                                await self._process_async_callback(
+                                    callback_results, response)
             else:
                 if isinstance(request_item, (dict, str)):
                     self.success_counts += 1
                     await self.loop.run_in_executor(self.executor,
-                                                    self.process_result,
+                                                    self.process_item,
                                                     request_item)
                 else:
                     self.failed_counts += 1
 
             self.request_queue.task_done()
 
+    def create_task(self, request_body):
+        task = asyncio.ensure_future(self.request(**request_body._asdict()))
+        return task
+
     async def request_producer(self):
         async for request_body in self.make_request_body():
             task = None
             if isinstance(request_body, RequestBody):
-                task = asyncio.ensure_future(
-                    self.request(**request_body._asdict()))
+                task = self.create_task(request_body)
             elif isinstance(request_body, (dict, str)) or request_body is None:
                 task = request_body
             await self.request_queue.put(task)
         # for _ in range(self.worker_numbers):
         #     await self.request_queue.put(None)
-        await self.request_queue.join()
 
     async def make_request_body(self):
         yield self.RequestBody('https://pyhton.org')
 
     async def run(self):
+        await self.request_producer()
         consumers = [
             asyncio.ensure_future(self.request_worker())
             for _ in range(self.worker_numbers)
         ]
         for i, worker in enumerate(consumers):
             self.logger.info(f"Worker{i} started: {id(worker)}")
-        await self.request_producer()
+        await self.request_queue.join()
         # await asyncio.wait(consumers)
         # for worker in consumers:
         #     worker.cancel()
-        # self.logger.info(r)
         # await asyncio.gather(*consumers, return_exceptions=True)
         await self.stop()
 
