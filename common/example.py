@@ -10,7 +10,8 @@ logger = get_logger('example_spider')
 class ExampleSpider(AsyncSpider):
     proxy = 'liebaoV1'
     worker_numbers = 4
-    concurrency = 32
+    concurrency = 16
+    retry_time = 1
 
     @staticmethod
     def make_headers():
@@ -28,27 +29,34 @@ class ExampleSpider(AsyncSpider):
         }
         return headers
 
-    async def make_request_body(self):
+    async def start_requests(self):
         shop_list = [
             'aDpceDB', 'JIBMdzz', 'QqkdRkd', 'JlLHLNH', 'wxATQZg', 'zYfkZcb',
             'zYfkZcb', 'hxiESSw', 'lVKMfKy', 'qIvUBNX', 'PAZfwKy'
         ]
-        for shop_id in shop_list:
-            for page in range(10):
+        for shop_id in shop_list[:]:
+            for page in range(1, 2):
                 url = f'https://ec.snssdk.com/shop/goodsList?shop_id={shop_id}&size=10&page={page}&b_type_new=0&device_id=0&is_outside=1'
                 method = 'GET'
                 headers = self.make_headers()
-                yield self.RequestBody(
+                yield self.Request(
                     url,
                     method,
                     headers,
                     callback=self.parse,
                 )
+        # url = 'http://quotes.toscrape.com/page/1/'
+        # yield self.RequestBody(url, callback=self.parse)
 
-    def parse(self, res):
-        self.logger.info(res)
-        return res
-        # self.redis_client.lpush('mytest', json.dumps(res))
+    async def parse(self, res):
+        self.logger.info(res.text)
+        yield res.text
+        for i in range(2, 3):
+            url = f'http://quotes.toscrape.com/page/{i}/'
+            yield self.Request(url, callback=self.parse_item)
+
+    def parse_item(self, res):
+        self.logger.info(res.text)
 
 
 ExampleSpider.start(logger=logger)

@@ -59,7 +59,7 @@ class AsyncSpider:
         self.request_queue = asyncio.Queue()
         self.executor = ThreadPoolExecutor()
         self.worker_tasks = []
-        self.RequestBody = RequestBody
+        self.Request = RequestBody
         self.loop = asyncio.get_event_loop()
         # self.env = env
         if env:
@@ -230,7 +230,7 @@ class AsyncSpider:
         return task
 
     async def request_producer(self):
-        async for request_body in self.make_request_body():
+        async for request_body in self.start_requests():
             task = None
             if isinstance(request_body, RequestBody):
                 task = self.create_task(request_body)
@@ -240,8 +240,8 @@ class AsyncSpider:
         # for _ in range(self.worker_numbers):
         #     await self.request_queue.put(None)
 
-    async def make_request_body(self):
-        yield self.RequestBody('https://pyhton.org')
+    async def start_requests(self):
+        yield self.Request('https://pyhton.org')
 
     async def run(self):
         await self.request_producer()
