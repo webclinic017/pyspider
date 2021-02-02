@@ -15,12 +15,13 @@ class PddParamsProducer:
 
     async def get_nano_fp(self):
         url = self.anti_v2_host + "/antiV2Nano"
-        res = await aiorequest(url,
-                               headers=self.headers,
-                               timeout=self.timeout,
-                               return_type='text',
-                               session=self.session)
-        return res
+        res = await aiorequest(
+            url,
+            headers=self.headers,
+            timeout=self.timeout,
+            session=self.session,
+        )
+        return res.text
 
     async def get_anticontent(
         self,
@@ -41,9 +42,10 @@ class PddParamsProducer:
             'page': page,
             'screen': screen,
         }
-        res = await aiorequest(url,
-                               headers=self.headers,
-                               params=params,
-                               return_type='text',
-                               session=self.session)
-        return res
+        res = await aiorequest(
+            url,
+            headers=self.headers,
+            params=params,
+            session=self.session,
+        )
+        return res.text
