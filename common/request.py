@@ -20,6 +20,8 @@ else:
 
 
 class Response:
+    __slots__ = ('text', 'ok', 'headers', 'status')
+
     def __init__(self, text, ok, headers, status) -> None:
         self.text = text
         self.ok = ok
