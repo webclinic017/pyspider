@@ -3,8 +3,7 @@ import random
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from inspect import isawaitable, ismethod, isasyncgen, isgenerator
-from json.decoder import JSONDecodeError
+from inspect import isasyncgen, isgenerator
 from types import AsyncGeneratorType
 from typing import Any, Awaitable, Dict, NamedTuple
 
@@ -145,13 +144,9 @@ class AsyncSpider:
                         self.failed_counts += 1
                     else:
                         self.success_counts += 1
-                        if isawaitable(callback):
-                            result = await callback(res)
-                        elif ismethod(callback):
-                            result = await self.loop.run_in_executor(
-                                self.executor, callback, res)
-                        else:
-                            result = res
+                        result = None
+                        if callable(callback):
+                            result = callback(res)
                         return result, res
             else:
                 self.logger.error("can't get proxy!")
@@ -206,13 +201,8 @@ class AsyncSpider:
             #     return
             if isinstance(request_item, Awaitable):
                 if not is_gather:
-                    result = await request_item
-                    if isinstance(result, (dict, str)):
-                        self.success_counts += 1
-                        await self.loop.run_in_executor(
-                            self.executor, self.process_item, result)
-                    else:
-                        self.failed_counts += 1
+                    result, res = await request_item
+                    await self._process_async_callback(result, res)
                 else:
                     self.worker_tasks.append(request_item)
                     if self.request_queue.empty():
