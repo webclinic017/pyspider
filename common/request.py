@@ -103,9 +103,19 @@ class Request:
         proxy=None,
         session=None,
         timeout=20,
+        logger=None,
     ):
-        res = await cls(url, method, headers, params, data, proxy, session,
-                        timeout).fetch()
+        res = await cls(
+            url,
+            method,
+            headers,
+            params,
+            data,
+            proxy,
+            session,
+            timeout,
+            logger=logger,
+        ).fetch()
         return res
 
 

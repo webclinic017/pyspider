@@ -1,13 +1,20 @@
 import datetime
 import logging
-import os
 import logging.handlers
+import os
+import sys
+import time
 
 
-def get_logger(file_name, log_dir='D:\\logs'):
-    logger = logging.getLogger(file_name)
-    if not file_name.endswith('.log'):
-        file_name = file_name + ':' + str(datetime.date.today()) + '.log'
+def get_logger(name):
+    if sys.platform == 'win32':
+        base_dir = 'D:\\logs'
+    else:
+        base_dir = '/data/logs'
+    if not os.path.exists(base_dir):
+        os.mkdir(base_dir)
+    logger = logging.getLogger(name)
+    file_name = str(datetime.date.today()) + '.log'
     logger.setLevel(logging.DEBUG)
     # create console handler and set level to debug
     ch = logging.StreamHandler()
@@ -18,11 +25,17 @@ def get_logger(file_name, log_dir='D:\\logs'):
     # add formatter to ch
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-    if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
-    log_file = os.path.join(log_dir, file_name)
-    handler = logging.handlers.RotatingFileHandler(log_file,
+    log_path = os.path.join(base_dir, name)
+    if not os.path.exists(log_path):
+        os.mkdir(log_path)
+    log_file_path = os.path.join(log_path, file_name)
+    handler = logging.handlers.RotatingFileHandler(log_file_path,
                                                    maxBytes=1024 * 1024)
+    dir_list = [os.path.join(log_path, file) for file in os.listdir(log_path)]
+    for log in dir_list:
+        create_time = int(os.path.getctime(log))
+        if int(time.time()) - create_time >= 3600 * 24 * 3:
+            os.remove(log)
     handler.setFormatter(formatter)
     handler.setLevel(logging.ERROR)
     logger.addHandler(handler)

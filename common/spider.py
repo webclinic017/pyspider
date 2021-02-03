@@ -138,6 +138,7 @@ class AsyncSpider:
                         params=params,
                         timeout=self.timeout,
                         session=self.session,
+                        logger=self.logger,
                     )
                     await asyncio.sleep(self.delay)
                     if not res:
