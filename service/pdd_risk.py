@@ -21,7 +21,8 @@ class PddParamsProducer:
             timeout=self.timeout,
             session=self.session,
         )
-        return res.text
+        if res:
+            return res.text
 
     async def get_anticontent(
         self,
@@ -48,4 +49,5 @@ class PddParamsProducer:
             params=params,
             session=self.session,
         )
-        return res.text
+        if res:
+            return res.text
