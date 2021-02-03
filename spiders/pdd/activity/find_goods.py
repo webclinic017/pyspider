@@ -5,7 +5,7 @@ import sys
 if sys.platform == 'win32':
     path = 'C:\\Users\\Ety\\Desktop\\pyspider'
 else:
-    path = '/data/spider/pyflow'
+    path = '/data/spider/pyspider'
 sys.path.append(path)
 from utils.log import get_logger
 from common.spider import AsyncSpider
