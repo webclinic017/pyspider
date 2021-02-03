@@ -42,10 +42,10 @@ class AsyncSpider:
     retry_time = 3
     concurrency = 20
     delay = random.uniform(0, 1)
-    proxy = 'liebaoV1'
+    proxy = 'pinzan'
     ua_type = 'mobile'
     # 消费者数量
-    worker_numbers = 2
+    worker_numbers = 4
     batch_num = 10
     timeout = 5
     failed_counts = 0
