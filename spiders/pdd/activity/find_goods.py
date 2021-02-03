@@ -103,7 +103,7 @@ class CrawlFindGoods(AsyncSpider):
         url = 'https://mobile.yangkeduo.com/proxy/api/api/lithium/query/goods_list?pdduid=0'
         api_uid = 'CiFJel9u8IKrTwBlVt+lAg=='
         referer = 'http://mobile.yangkeduo.com/sbxeghhl.html?_pdd_fs=1&_pdd_nc=ffffff&_pdd_tc=00ffffff&_pdd_sbs=1&refer_page_name=index'
-        for page in range(2):
+        for page in range(3):
             for cate_info in cate_list:
                 nano_fp = await PddParamsProducer(self.session).get_nano_fp()
                 headers = self.make_headers(nano_fp)
@@ -115,7 +115,7 @@ class CrawlFindGoods(AsyncSpider):
                 yield self.Request(url,
                                    method='POST',
                                    headers=headers,
-                                   data=body,
+                                   data=json.dumps(body),
                                    callback=self.parse)
 
     def parse(self, response):
