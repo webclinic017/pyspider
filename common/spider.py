@@ -277,8 +277,8 @@ class AsyncSpider:
             self.logger.info("Spider finished!")
 
     @classmethod
-    def start(cls, logger=None, loop=None, close_event_loop=True):
-        spider = cls(logger=logger)
+    def start(cls, logger=None, loop=None, close_event_loop=True, env='test'):
+        spider = cls(logger=logger, env=env)
         # if sys.version_info > (3, 6):
         #     asyncio.run(spider._start())
         # else:

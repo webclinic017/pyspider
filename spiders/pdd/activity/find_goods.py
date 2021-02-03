@@ -71,7 +71,7 @@ class CrawlFindGoods(AsyncSpider):
         return request_body
 
     @staticmethod
-    def make_headers():
+    def make_headers(nano_fp):
         headers = {
             'authority':
             'mobile.yangkeduo.com',
@@ -94,7 +94,7 @@ class CrawlFindGoods(AsyncSpider):
             'accept-language':
             'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
             'cookie':
-            'api_uid=CiFJel9u8IKrTwBlVt+lAg==; _nano_fp=XpEaX5Xyn5dxl0TqlT_MZ9ktTv3n9OjlTVb17lVc; webp=1'
+            f'api_uid=CiFJel9u8IKrTwBlVt+lAg==; _nano_fp={nano_fp}; webp=1'
         }
         return headers
 
@@ -106,7 +106,7 @@ class CrawlFindGoods(AsyncSpider):
         for page in range(2):
             for cate_info in cate_list:
                 nano_fp = await PddParamsProducer(self.session).get_nano_fp()
-                headers = self.make_headers()
+                headers = self.make_headers(nano_fp)
                 anti_content = await PddParamsProducer(
                     self.session).get_anticontent(headers['User-Agent'],
                                                   api_uid, nano_fp, referer,
@@ -123,4 +123,4 @@ class CrawlFindGoods(AsyncSpider):
 
 
 if __name__ == "__main__":
-    CrawlFindGoods.start()
+    CrawlFindGoods.start(env='')
