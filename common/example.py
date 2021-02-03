@@ -8,7 +8,7 @@ logger = get_logger('example_spider')
 
 
 class ExampleSpider(AsyncSpider):
-    proxy = 'liebaoV1'
+    proxy = 'pinzan'
     worker_numbers = 4
     concurrency = 16
     retry_time = 1
@@ -35,7 +35,7 @@ class ExampleSpider(AsyncSpider):
             'zYfkZcb', 'hxiESSw', 'lVKMfKy', 'qIvUBNX', 'PAZfwKy'
         ]
         for shop_id in shop_list[:]:
-            for page in range(1, 2):
+            for page in range(1, 5):
                 url = f'https://ec.snssdk.com/shop/goodsList?shop_id={shop_id}&size=10&page={page}&b_type_new=0&device_id=0&is_outside=1'
                 method = 'GET'
                 headers = self.make_headers()
@@ -46,7 +46,7 @@ class ExampleSpider(AsyncSpider):
                     callback=self.parse,
                 )
         # url = 'http://quotes.toscrape.com/page/1/'
-        # yield self.RequestBody(url, callback=self.parse)
+        # yield self.Request(url, callback=self.parse)
 
     async def parse(self, res):
         self.logger.info(res.text)
