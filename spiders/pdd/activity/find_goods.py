@@ -2,6 +2,7 @@ import json
 import re
 import requests
 import sys
+from urllib.parse import quote
 if sys.platform == 'win32':
     path = 'C:\\Users\\Ety\\Desktop\\pyspider'
 else:
@@ -73,35 +74,29 @@ class CrawlFindGoods(AsyncSpider):
     async def make_headers(self, nano_fp):
         ua = await self.get_ua()
         headers = {
-            'authority':
-            'mobile.yangkeduo.com',
-            'accept':
+            'Proxy-Connection':
+            'keep-alive',
+            'Accept':
             'application/json, text/plain, */*',
             'User-Agent':
             ua,
-            'content-type':
+            'Content-Type':
             'application/json;charset=UTF-8',
-            'origin':
-            'https://mobile.yangkeduo.com',
-            'sec-fetch-site':
-            'same-origin',
-            'sec-fetch-mode':
-            'cors',
-            'sec-fetch-dest':
-            'empty',
-            'referer':
-            'http://mobile.yangkeduo.com/sbxeghhl.html?_pdd_fs=1&_pdd_nc=ffffff&_pdd_tc=00ffffff&_pdd_sbs=1&refer_page_name=index',
-            'accept-language':
+            'Origin':
+            'http://mobile.yangkeduo.com',
+            'Referer':
+            'http://mobile.yangkeduo.com/sbxeghhl.html?_pdd_fs=1&_pdd_nc=ffffff&_pdd_tc=00ffffff&_pdd_sbs=1&refer_page_el_sn=1961510&refer_page_name=inde',
+            'Accept-Language':
             'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-            'cookie':
-            f'api_uid=CiFJel9u8IKrTwBlVt+lAg==; _nano_fp={nano_fp}; webp=1'
+            'Cookie':
+            f'api_uid=CkmjnGATsRdMFQBWrnXTAg==; _nano_fp={nano_fp}; ua={quote(ua)}; webp=1'
         }
         return headers
 
     async def start_requests(self):
         cate_list = self.get_cat_id()
         url = 'https://mobile.yangkeduo.com/proxy/api/api/lithium/query/goods_list?pdduid=0'
-        api_uid = 'CiFJel9u8IKrTwBlVt+lAg=='
+        api_uid = 'CkmjnGATsRdMFQBWrnXTAg=='
         referer = 'http://mobile.yangkeduo.com/sbxeghhl.html?_pdd_fs=1&_pdd_nc=ffffff&_pdd_tc=00ffffff&_pdd_sbs=1&refer_page_name=index'
         for page in range(1, 11):
             for cate_info in cate_list:
