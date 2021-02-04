@@ -38,13 +38,11 @@ class CrawlFindGoods(AsyncSpider):
             'sec-fetch-dest': 'document',
             'accept-language': 'zh-CN,zh;q=0.9,ja;q=0.8,en;q=0.7',
         }
-        # data = requests.get(url, headers=headers, timeout=3).text
-        # print(data)
         ss = requests.Session()
         ss.headers = headers
         ss.stream = True
-        _ = ss.get(url, timeout=10)
-        data = ss.get(url, timeout=10).text
+        _ = ss.get(url, timeout=10, verify=False)
+        data = ss.get(url, timeout=10, verify=False).text
         ss.close()
         pattern = re.compile(r'{"store":.*}')
         result = pattern.findall(data)[0]
