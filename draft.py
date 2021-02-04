@@ -1,4 +1,4 @@
-from typing import Any, NamedTuple,Dict
+from typing import Any, NamedTuple, Dict
 
 
 class RequestBody(NamedTuple):
