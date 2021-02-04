@@ -65,7 +65,7 @@ class LazyProperty:
 
     def __get__(self, obj, cls):
         if not obj:
-            return None
+            return self
         value = self.method(obj)
         print(f'value:{value}')
         setattr(obj, self.method_name, value)
