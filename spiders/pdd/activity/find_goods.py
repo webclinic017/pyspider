@@ -70,15 +70,15 @@ class CrawlFindGoods(AsyncSpider):
         }
         return request_body
 
-    @staticmethod
-    def make_headers(nano_fp):
+    async def make_headers(self, nano_fp):
+        ua = await self.get_ua()
         headers = {
             'authority':
             'mobile.yangkeduo.com',
             'accept':
             'application/json, text/plain, */*',
             'User-Agent':
-            '',
+            ua,
             'content-type':
             'application/json;charset=UTF-8',
             'origin':
@@ -103,10 +103,10 @@ class CrawlFindGoods(AsyncSpider):
         url = 'https://mobile.yangkeduo.com/proxy/api/api/lithium/query/goods_list?pdduid=0'
         api_uid = 'CiFJel9u8IKrTwBlVt+lAg=='
         referer = 'http://mobile.yangkeduo.com/sbxeghhl.html?_pdd_fs=1&_pdd_nc=ffffff&_pdd_tc=00ffffff&_pdd_sbs=1&refer_page_name=index'
-        for page in range(3):
+        for page in range(1, 11):
             for cate_info in cate_list:
                 nano_fp = await PddParamsProducer(self.session).get_nano_fp()
-                headers = self.make_headers(nano_fp)
+                headers = await self.make_headers(nano_fp)
                 anti_content = await PddParamsProducer(
                     self.session).get_anticontent(headers['User-Agent'],
                                                   api_uid, nano_fp, referer,

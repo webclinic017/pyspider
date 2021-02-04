@@ -115,16 +115,16 @@ class AsyncSpider:
         params=None,
         callback=None,
     ):
-        ua = await self.get_ua(ua_type=self.ua_type)
-        if not headers:
-            headers = {}
-        if ua:
-            headers['User-Agent'] = ua
-            if 'user-agent' in headers:
-                del headers['user-agent']
-        else:
-            self.logger.warning(
-                "can't get available random ua,will use the defult!")
+        # ua = await self.get_ua(ua_type=self.ua_type)
+        # if not headers:
+        #     headers = {}
+        # if ua:
+        #     headers['User-Agent'] = ua
+        #     if 'user-agent' in headers:
+        #         del headers['user-agent']
+        # else:
+        #     self.logger.warning(
+        #         "can't get available random ua,will use the defult!")
         for _ in range(self.retry_time):
             proxy = await self.get_proxy(proxy_type=self.proxy)
             if proxy or proxy == '':
