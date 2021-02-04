@@ -18,15 +18,13 @@ content_id = set()
 headers = {
     'authority': 'mobile.yangkeduo.com',
     'accept': 'application/json, text/plain, */*',
-    #'accesstoken': 'YJETA3VRJSUVVJQ2ITCTNMIIJXST2VQCDSDC3TLKF4EITBRIHL4A1111970',
     'user-agent':
     'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
-    #'verifyauthtoken': '7KVyLyIW1OqyDkITVJIgqw9992aff0c79dd580d',
     'sec-fetch-site': 'same-origin',
     'sec-fetch-mode': 'cors',
     'sec-fetch-dest': 'empty',
     'accept-language': 'zh-CN,zh;q=0.9',
-    #'Cookie': 'api_uid=CiT56l7XHZI1bQAuJy+bAg=='
+    # 'Cookie': 'api_uid=CiT56l7XHZI1bQAuJy+bAg=='
 }
 
 
