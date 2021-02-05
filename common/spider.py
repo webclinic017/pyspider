@@ -245,13 +245,13 @@ class AsyncSpider:
         yield self.Request('https://pyhton.org')
 
     async def run(self):
-        await self.request_producer()
         consumers = [
             asyncio.ensure_future(self.request_worker())
             for _ in range(self.worker_numbers)
         ]
         for i, worker in enumerate(consumers):
             self.logger.info(f"Worker{i} started: {id(worker)}")
+        await self.request_producer()
         await self.request_queue.join()
         # await asyncio.wait(consumers)
         # for worker in consumers:
