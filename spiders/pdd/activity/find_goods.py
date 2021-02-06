@@ -25,18 +25,12 @@ class CrawlFindGoods(AsyncSpider):
         url = 'https://mobile.yangkeduo.com/sbxeghhl.html'
         headers = {
             'authority': 'mobile.yangkeduo.com',
-            'pragma': 'no-cache',
-            'cache-control': 'no-cache',
             'upgrade-insecure-requests': '1',
             'user-agent':
             'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36',
             'accept':
             'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'sec-fetch-site': 'none',
-            'sec-fetch-mode': 'navigate',
-            'sec-fetch-user': '?1',
-            'sec-fetch-dest': 'document',
-            'accept-language': 'zh-CN,zh;q=0.9,ja;q=0.8,en;q=0.7',
+            'accept-language': 'zh-CN,zh;q=0.9,ja;q=0.8,en;q=0.7'
         }
         ss = requests.Session()
         ss.headers = headers
