@@ -1,16 +1,20 @@
 import json
 import re
-import requests
 import sys
 from urllib.parse import quote
+
+import requests
+
 if sys.platform == 'win32':
     path = 'C:\\Users\\Ety\\Desktop\\pyspider'
 else:
     path = '/data/spider/pyspider'
 sys.path.append(path)
-from utils.log import get_logger
+import itertools
+
 from common.spider import AsyncSpider
 from service.pdd_risk import PddParamsProducer
+from utils.log import get_logger
 
 logger = get_logger('activity_find_goods')
 data_queue = 'pdd_activity_find_goods'
@@ -90,20 +94,20 @@ class CrawlFindGoods(AsyncSpider):
         url = 'https://mobile.yangkeduo.com/proxy/api/api/lithium/query/goods_list?pdduid=0'
         api_uid = 'CkmjnGATsRdMFQBWrnXTAg=='
         referer = 'http://mobile.yangkeduo.com/sbxeghhl.html?_pdd_fs=1&_pdd_nc=ffffff&_pdd_tc=00ffffff&_pdd_sbs=1&refer_page_name=index'
-        for page in range(1, 31):
-            for cate_info in cate_list:
-                nano_fp = await PddParamsProducer(self.session).get_nano_fp()
-                headers = await self.make_headers(nano_fp)
-                anti_content = await PddParamsProducer(
-                    self.session).get_anticontent(headers['User-Agent'],
-                                                  api_uid, nano_fp, referer,
-                                                  page)
-                body = self.make_body(cate_info, anti_content, page)
-                yield self.Request(url,
-                                   method='POST',
-                                   headers=headers,
-                                   data=json.dumps(body),
-                                   callback=self.parse)
+        for page, cate_info in itertools.product(range(1, 31), cate_list):
+            nano_fp = await PddParamsProducer(self.session).get_nano_fp()
+            headers = await self.make_headers(nano_fp)
+            anti_content = await PddParamsProducer(
+                self.session).get_anticontent(headers['User-Agent'], api_uid,
+                                              nano_fp, referer, page)
+            body = self.make_body(cate_info, anti_content, page)
+            yield self.Request(
+                url,
+                method='POST',
+                headers=headers,
+                data=json.dumps(body),
+                callback=self.parse,
+            )
 
     def parse(self, response):
         print(response.json())
