@@ -152,31 +152,25 @@ class AsyncSpider:
             else:
                 self.logger.error("can't get proxy!")
 
-    async def _process_async_callback(self, callback_results, response=None):
+    async def process_callback(self, callback_results, response=None):
         try:
             if isasyncgen(callback_results):
                 async for callback_result in callback_results:
-                    if isinstance(callback_result, AsyncGeneratorType):
-                        await self._process_async_callback(callback_result)
-                    elif isinstance(callback_result, RequestBody):
-                        self.request_queue.put_nowait(
-                            self.create_task(callback_result))
-                    elif isinstance(callback_result, (dict, str)):
-                        # Process target item
-                        self.process_item(callback_result)
+                    await self._process_callback(callback_result)
             elif isgenerator(callback_results):
                 for callback_result in callback_results:
-                    if isinstance(callback_result, AsyncGeneratorType):
-                        await self._process_async_callback(callback_result)
-                    elif isinstance(callback_result, RequestBody):
-                        self.request_queue.put_nowait(
-                            self.create_task(callback_result))
-                    elif isinstance(callback_result, (dict, str)):
-                        # Process target item
-                        self.process_item(callback_result)
-
+                    await self._process_callback(callback_result)
         except Exception as e:
             self.logger.exception(e)
+
+    async def _process_callback(self, callback_result):
+        if isinstance(callback_result, AsyncGeneratorType):
+            await self.process_callback(callback_result)
+        elif isinstance(callback_result, RequestBody):
+            self.request_queue.put_nowait(self.create_task(callback_result))
+        elif isinstance(callback_result, (dict, str)):
+            # Process target item
+            self.process_item(callback_result)
 
     def parse(self, response):
         """
@@ -203,7 +197,7 @@ class AsyncSpider:
             if isinstance(request_item, Awaitable):
                 if not is_gather:
                     result, res = await request_item
-                    await self._process_async_callback(result, res)
+                    await self.process_callback(result, res)
                 else:
                     self.worker_tasks.append(request_item)
                     if self.request_queue.empty():
@@ -213,7 +207,7 @@ class AsyncSpider:
                         for result in results:
                             if not isinstance(result, RuntimeError) and result:
                                 callback_results, response = result
-                                await self._process_async_callback(
+                                await self.process_callback(
                                     callback_results, response)
             else:
                 if isinstance(request_item, (dict, str)):
