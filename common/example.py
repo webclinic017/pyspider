@@ -1,6 +1,6 @@
 import json
 import sys
-sys.path.append('C:\\Users\\Ety\\Desktop\\pyspider')
+sys.path.append('C:\\Users\\86156\\Desktop\\pyspider')
 from common.spider import AsyncSpider
 from utils.log import get_logger
 
@@ -8,7 +8,7 @@ logger = get_logger('example_spider')
 
 
 class ExampleSpider(AsyncSpider):
-    proxy = 'pinzan'
+    proxy = ''
     worker_numbers = 4
     concurrency = 16
     retry_time = 1
@@ -35,7 +35,7 @@ class ExampleSpider(AsyncSpider):
             'zYfkZcb', 'hxiESSw', 'lVKMfKy', 'qIvUBNX', 'PAZfwKy'
         ]
         for shop_id in shop_list[:]:
-            for page in range(1, 5):
+            for page in range(1, 2):
                 url = f'https://ec.snssdk.com/shop/goodsList?shop_id={shop_id}&size=10&page={page}&b_type_new=0&device_id=0&is_outside=1'
                 method = 'GET'
                 headers = self.make_headers()
@@ -59,4 +59,4 @@ class ExampleSpider(AsyncSpider):
         self.logger.info(res.text)
 
 
-ExampleSpider.start(logger=logger)
+ExampleSpider.start(logger=logger, env='')
