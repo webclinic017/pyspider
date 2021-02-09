@@ -12,7 +12,7 @@ import async_timeout
 import loguru
 import ujson
 from aiohttp import ClientSession
-from config import RedisClient, KafkaClient
+from config import KafkaClient, RedisClient
 from utils.tools import LazyProperty
 
 from common.request import aiorequest
