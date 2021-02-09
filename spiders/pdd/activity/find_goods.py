@@ -56,7 +56,8 @@ class CrawlFindGoods(AsyncSpider):
             i['list_id'] = list_id
         return cate_list
 
-    def make_body(self, cate_info, anti_content, page):
+    @staticmethod
+    def make_body(cate_info, anti_content, page):
         request_body = {
             "offset": (page - 1) * 20,
             "count": 20,

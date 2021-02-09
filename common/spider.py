@@ -12,7 +12,7 @@ import async_timeout
 import loguru
 import ujson
 from aiohttp import ClientSession
-from config import RedisClient
+from config import RedisClient, KafkaClient
 from utils.tools import LazyProperty
 
 from common.request import aiorequest
@@ -51,6 +51,7 @@ class AsyncSpider:
     failed_counts = 0
     success_counts = 0
     key = None
+    topic = None
 
     def __init__(self, logger=None, env='test') -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
@@ -64,6 +65,7 @@ class AsyncSpider:
         # self.env = env
         if env:
             self.redis_client = RedisClient(env)
+            self.kafka_client = KafkaClient(env)
 
     # @LazyProperty
     # def redis_client(self):
@@ -187,6 +189,8 @@ class AsyncSpider:
                 self.key,
                 ujson.dumps(result, ensure_ascii=False),
             )
+        if self.topic:
+            self.kafka_client.produce(self.topic, value=result)
 
     async def request_worker(self, is_gather=True):
         while True:
