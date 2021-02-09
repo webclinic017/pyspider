@@ -16,6 +16,7 @@ from config import KafkaClient, RedisClient
 from utils.tools import LazyProperty
 
 from common.request import aiorequest
+from common.settings import DEFAULT_UA
 
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -89,6 +90,7 @@ class AsyncSpider:
             return ua
         except Exception as e:
             self.logger.error(f"获取ua出错：{repr(e)}")
+            return DEFAULT_UA[ua_type]
 
     async def get_proxy(self, proxy_type='pinzan'):
         assert proxy_type in {'pinzan', 'dubsix', '2808', 'liebaoV1', ''}
@@ -172,7 +174,11 @@ class AsyncSpider:
             self.request_queue.put_nowait(self.create_task(callback_result))
         elif isinstance(callback_result, (dict, str)):
             # Process target item
-            self.process_item(callback_result)
+            await self.loop.run_in_executor(
+                self.executor,
+                self.process_item,
+                callback_result,
+            )
 
     def parse(self, response):
         """

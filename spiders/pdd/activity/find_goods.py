@@ -17,10 +17,11 @@ from service.pdd_risk import PddParamsProducer
 from utils.log import get_logger
 
 logger = get_logger('activity_find_goods')
-data_queue = 'pdd_activity_find_goods'
 
 
 class CrawlFindGoods(AsyncSpider):
+    key = 'pdd_activity_find_goods'
+
     def get_cat_id(self, only_get_listId=False):
         """
         获取分类信息
@@ -111,8 +112,9 @@ class CrawlFindGoods(AsyncSpider):
             )
 
     def parse(self, response):
-        print(response.json())
+        result = response.json()
+        return result
 
 
 if __name__ == "__main__":
-    CrawlFindGoods.start(env='')
+    CrawlFindGoods.start(env='redis15')
