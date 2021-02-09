@@ -215,13 +215,9 @@ class AsyncSpider:
                                     callback_results, response)
             else:
                 if isinstance(request_item, (dict, str)):
-                    self.success_counts += 1
                     await self.loop.run_in_executor(self.executor,
                                                     self.process_item,
                                                     request_item)
-                else:
-                    self.failed_counts += 1
-
             self.request_queue.task_done()
 
     def create_task(self, request_body):
@@ -290,7 +286,6 @@ class AsyncSpider:
     async def cancel_all_tasks():
         """
         Cancel all tasks
-        :return:
         """
         tasks = []
         for task in asyncio.Task.all_tasks():
@@ -302,8 +297,6 @@ class AsyncSpider:
     async def stop(self, _signal=None):
         """
         Finish all running tasks, cancel remaining tasks.
-        :param _signal:
-        :return:
         """
         self.logger.info("Stopping spider")
         await self.cancel_all_tasks()
