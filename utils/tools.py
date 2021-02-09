@@ -1,9 +1,10 @@
+import keyword
 import random
 import re
 import string
 from collections.abc import Mapping, MutableSequence
-import keyword
 from typing import Any
+
 _ITERABLE_SINGLE_VALUES = dict, str, bytes
 
 
