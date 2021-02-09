@@ -75,7 +75,7 @@ class AsyncSpider(Settings):
             ua = res['data']
             return ua
         except Exception as e:
-            self.logger.error(f"获取ua出错：{repr(e)}")
+            self.logger.warning(f"获取ua出错：{repr(e)},将使用默认ua")
             return self.default_ua[self.ua_type]
 
     async def get_proxy(self, proxy_type='pinzan'):
@@ -105,16 +105,10 @@ class AsyncSpider(Settings):
         params=None,
         callback=None,
     ):
-        # ua = await self.get_ua(ua_type=self.ua_type)
-        # if not headers:
-        #     headers = {}
-        # if ua:
-        #     headers['User-Agent'] = ua
-        #     if 'user-agent' in headers:
-        #         del headers['user-agent']
-        # else:
-        #     self.logger.warning(
-        #         "can't get available random ua,will use the defult!")
+        if not headers:
+            headers = self.default_headers
+            ua = await self.get_ua(ua_type=self.ua_type)
+            headers['User-Agent'] = ua
         for _ in range(self.retry_time):
             proxy = await self.get_proxy(proxy_type=self.proxy)
             if proxy or proxy == '':
