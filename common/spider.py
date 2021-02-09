@@ -15,7 +15,7 @@ from aiohttp import ClientSession
 from config import KafkaClient, RedisClient
 from utils.tools import LazyProperty
 
-from common import settings
+from common.settings import Settings
 from common.request import aiorequest
 
 if sys.platform == 'win32':
@@ -37,22 +37,9 @@ class RequestBody(NamedTuple):
     callback: Any = None
 
 
-class AsyncSpider:
+class AsyncSpider(Settings):
     """异步爬虫，支持异步上下文管理器
     """
-    retry_time = 3
-    concurrency = 20
-    delay = random.uniform(0, 1)
-    proxy = 'pinzan'
-    ua_type = 'mobile'
-    # 消费者数量
-    worker_numbers = 4
-    timeout = 5
-    failed_counts = 0
-    success_counts = 0
-    key = None
-    topic = None
-
     def __init__(self, logger=None, env='test') -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.sem = asyncio.Semaphore(self.concurrency)
@@ -89,7 +76,7 @@ class AsyncSpider:
             return ua
         except Exception as e:
             self.logger.error(f"获取ua出错：{repr(e)}")
-            return settings.DEFAULT_UA[ua_type]
+            return self.default_ua[self.ua_type]
 
     async def get_proxy(self, proxy_type='pinzan'):
         assert proxy_type in {'pinzan', 'dubsix', '2808', 'liebaoV1', ''}

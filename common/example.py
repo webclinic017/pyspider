@@ -1,4 +1,3 @@
-import json
 import sys
 sys.path.append('C:\\Users\\86156\\Desktop\\pyspider')
 from common.spider import AsyncSpider
