@@ -100,3 +100,15 @@ class FrozenJson:
 
     def __setattr__(self, name: str, value: Any) -> None:
         setattr(self._data, name, value)
+
+
+class SingletonType(type):
+    """
+    单例元类
+    """
+    _instances = {}
+
+    def __call__(cls, *args: Any, **kwds: Any) -> Any:
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwds)
+        return cls._instances[cls]
