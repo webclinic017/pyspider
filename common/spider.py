@@ -154,11 +154,7 @@ class AsyncSpider(Settings):
             self.request_queue.put_nowait(self.create_task(callback_result))
         elif isinstance(callback_result, (dict, str)):
             # Process target item
-            await self.loop.run_in_executor(
-                self.executor,
-                self.process_item,
-                callback_result,
-            )
+            await self.run_in_executor(self.process_item, callback_result)
 
     def parse(self, response):
         """
@@ -201,10 +197,11 @@ class AsyncSpider(Settings):
                                     callback_results, response)
             else:
                 if isinstance(request_item, (dict, str)):
-                    await self.loop.run_in_executor(self.executor,
-                                                    self.process_item,
-                                                    request_item)
+                    await self.run_in_executor(self.process_item, request_item)
             self.request_queue.task_done()
+
+    async def run_in_executor(self, func, *args):
+        await self.loop.run_in_executor(self.executor, func, *args)
 
     def create_task(self, request_body):
         task = asyncio.ensure_future(self.request(**request_body._asdict()))
