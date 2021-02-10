@@ -1,6 +1,5 @@
 import asyncio
 import sys
-from json import JSONDecodeError
 from typing import Any, NamedTuple
 
 import aiohttp
