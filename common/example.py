@@ -43,7 +43,7 @@ class ExampleSpider(AsyncSpider):
             "PAZfwKy",
         ]
         for shop_id in shop_list[:]:
-            for page in range(1, 2):
+            for page in range(1, 5):
                 url = f"https://ec.snssdk.com/shop/goodsList?shop_id={shop_id}&size=10&page={page}&b_type_new=0&device_id=0&is_outside=1"
                 method = "GET"
                 headers = self.make_headers()
