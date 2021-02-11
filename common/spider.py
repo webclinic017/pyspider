@@ -15,8 +15,8 @@ from aiohttp import ClientSession
 from config import KafkaClient, RedisClient
 from utils.tools import LazyProperty
 
-from common.settings import Settings
 from common.request import aiorequest
+from common.settings import Settings
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
