@@ -59,7 +59,7 @@ class ExampleSpider(AsyncSpider):
     async def parse(self, res):
         self.logger.info(res.text)
         yield res.text
-        for i in range(2, 3):
+        for i in range(2, 4):
             url = f"http://quotes.toscrape.com/page/{i}/"
             yield self.Request(url, callback=self.parse_item)
 
