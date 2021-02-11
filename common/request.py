@@ -8,18 +8,19 @@ import ujson
 from aiohttp import ClientSession, TCPConnector
 import loguru
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 else:
     try:
         import uvloop
+
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     except ImportError:
         pass
 
 
 class Response:
-    __slots__ = ('text', 'ok', 'headers', 'status')
+    __slots__ = ("text", "ok", "headers", "status")
 
     def __init__(self, text, ok, headers, status) -> None:
         self.text = text
@@ -33,7 +34,7 @@ class Response:
 
 class RequestBody(NamedTuple):
     url: str
-    method: str = 'GET'
+    method: str = "GET"
     headers: Any = None
     params: Any = None
     data: Any = None
@@ -44,7 +45,7 @@ class Request:
     def __init__(
         self,
         url,
-        method='GET',
+        method="GET",
         headers=None,
         params=None,
         data=None,
@@ -74,13 +75,12 @@ class Request:
     async def fetch(self):
         try:
             async with async_timeout.timeout(self.timeout):
-                async with self.session.request(
-                        **self.request_body._asdict()) as resp:
+                async with self.session.request(**self.request_body._asdict()) as resp:
                     result = await resp.text()
         except aiohttp.ClientHttpProxyError as e:
-            self.logger.error(f'代理出错：{repr(e)}')
+            self.logger.error(f"代理出错：{repr(e)}")
         except Exception as e:
-            self.logger.error(f'请求{self.url}出错:{repr(e)}')
+            self.logger.error(f"请求{self.url}出错:{repr(e)}")
         else:
             res = Response(result, resp.ok, resp.headers, resp.status)
             return res
@@ -95,7 +95,7 @@ class Request:
     async def request(
         cls,
         url,
-        method='GET',
+        method="GET",
         headers=None,
         params=None,
         data=None,
