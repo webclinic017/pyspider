@@ -41,7 +41,7 @@ class RequestBody(NamedTuple):
 class AsyncSpider(Settings):
     """异步爬虫，支持异步上下文管理器"""
 
-    def __init__(self, logger=None, env="test") -> None:
+    def __init__(self, logger=None) -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.sem = asyncio.Semaphore(self.concurrency)
         self.logger = logger or loguru.logger
@@ -50,9 +50,10 @@ class AsyncSpider(Settings):
         self.Request = RequestBody
         self.loop = asyncio.get_event_loop()
         # self.env = env
-        if env:
-            self.redis_client = RedisClient(env)
-        # self.kafka_client = KafkaClient(env)
+        if self.redis_env:
+            self.redis_client = RedisClient(self.redis_env)
+        if self.kafka_env:
+            self.kafka_client = KafkaClient(self.kafka_env)
 
     # @LazyProperty
     # def redis_client(self):
@@ -172,8 +173,8 @@ class AsyncSpider(Settings):
                 self.key,
                 ujson.dumps(result, ensure_ascii=False),
             )
-        # if self.topic:
-        #     self.kafka_client.produce(self.topic, value=result)
+        if self.topic:
+            self.kafka_client.produce(self.topic, value=result)
 
     async def request_worker(self, is_gather=True):
         worker_tasks = []
@@ -258,8 +259,8 @@ class AsyncSpider(Settings):
             self.logger.info("Spider finished!")
 
     @classmethod
-    def start(cls, logger=None, loop=None, close_event_loop=True, env="test"):
-        spider = cls(logger=logger, env=env)
+    def start(cls, logger=None, loop=None, close_event_loop=True):
+        spider = cls(logger=logger)
         # if sys.version_info > (3, 6):
         #     asyncio.run(spider._start())
         # else:
