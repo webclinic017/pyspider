@@ -47,7 +47,6 @@ class AsyncSpider(Settings):
         self.logger = logger or loguru.logger
         self.request_queue = asyncio.Queue()
         self.executor = ThreadPoolExecutor()
-        self.worker_tasks = []
         self.Request = RequestBody
         self.loop = asyncio.get_event_loop()
         # self.env = env
@@ -177,6 +176,7 @@ class AsyncSpider(Settings):
             self.kafka_client.produce(self.topic, value=result)
 
     async def request_worker(self, is_gather=True):
+        worker_tasks = []
         while True:
             request_item = await self.request_queue.get()
             # if not request_item:
@@ -187,13 +187,13 @@ class AsyncSpider(Settings):
                     result, res = await request_item
                     await self.process_callback(result, res)
                 else:
-                    self.worker_tasks.append(request_item)
+                    worker_tasks.append(request_item)
                     if self.request_queue.empty():
                         results = await asyncio.gather(
                             *self.worker_tasks,
                             return_exceptions=True,
                         )
-                        self.worker_tasks = []
+                        worker_tasks = []
                         for result in results:
                             if not isinstance(result, RuntimeError) and result:
                                 callback_results, response = result
