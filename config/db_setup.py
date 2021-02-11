@@ -11,12 +11,12 @@ import kafka
 import pymysql
 import redis
 
-sys.path.append('..')
+sys.path.append("..")
 from config.db_config import KAFKA_CONF, MYSQL_CONF, REDIS_CONF
 
 
 class RedisClient(redis.Redis):
-    def __init__(self, env='test', db=0) -> None:
+    def __init__(self, env="test", db=0) -> None:
         self.pool = redis.ConnectionPool(db=db, **REDIS_CONF[env])
         super().__init__(connection_pool=self.pool)
         # self.db = self.setup_redis(env=env)
@@ -32,7 +32,7 @@ class RedisClient(redis.Redis):
         else:
             return client
 
-    def setup_redis(self, env='test'):
+    def setup_redis(self, env="test"):
         return self._setup_redis(**REDIS_CONF[env])
 
     def set_cache(self, name, key, value, cache_cycle=7, refresh=False):
@@ -57,17 +57,13 @@ class RedisClient(redis.Redis):
     def cache(self, name, key, value, cache_cycle=1000, refresh=False):
         cache_data = self.get_cache(name, key)
         if not cache_data:
-            self.set_cache(name,
-                           key,
-                           value,
-                           cache_cycle=cache_cycle,
-                           refresh=refresh)
+            self.set_cache(name, key, value, cache_cycle=cache_cycle, refresh=refresh)
             return value
         return cache_data
 
 
 class MysqlClient:
-    def __init__(self, env='test') -> None:
+    def __init__(self, env="test") -> None:
         self.conn = self.setup_connection(env=env)
         self.cursor = self.conn.cursor(pymysql.cursors.DictCursor)
 
@@ -76,11 +72,11 @@ class MysqlClient:
         try:
             conn = pymysql.connect(**kwargs)
         except pymysql.Error as e:
-            logging.error(f'数据库连接失败:{e}')
+            logging.error(f"数据库连接失败:{e}")
             raise
         return conn
 
-    def setup_connection(self, env='test'):
+    def setup_connection(self, env="test"):
         return self._setup_connection(**MYSQL_CONF[env])
 
     def create_table(self, sql):
@@ -109,15 +105,14 @@ class MysqlClient:
 
 
 class AioRedis:
-    def __init__(self, env='aio_test') -> None:
+    def __init__(self, env="aio_test") -> None:
         self.env = env
 
     async def setup(self):
         try:
-            aioredis_client = await aioredis.create_redis_pool(
-                **REDIS_CONF[self.env])
+            aioredis_client = await aioredis.create_redis_pool(**REDIS_CONF[self.env])
         except Exception as e:
-            raise Exception(f'异步redis连接失败:{e}')
+            raise Exception(f"异步redis连接失败:{e}")
         return aioredis_client
 
     async def close(self):
@@ -133,7 +128,7 @@ class AioRedis:
 
 
 @asynccontextmanager
-async def aio_mysql(env='test'):
+async def aio_mysql(env="test"):
     pool = await aiomysql.create_pool(**MYSQL_CONF[env])
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
@@ -148,7 +143,7 @@ async def aio_mysql(env='test'):
 
 
 class AioMysql:
-    def __init__(self, env='test') -> None:
+    def __init__(self, env="test") -> None:
         self.env = env
         self.conn = None
         self.cursor = None
@@ -181,7 +176,7 @@ class AioMysql:
 
 
 class KafkaClient:
-    def __init__(self, env='test', logger=None) -> None:
+    def __init__(self, env="test", logger=None) -> None:
         self.env = env
         self.producer = kafka.KafkaProducer(**KAFKA_CONF[self.env])
         self.consumer = kafka.KafkaConsumer(**KAFKA_CONF[self.env])
@@ -192,23 +187,27 @@ class KafkaClient:
 
     def produce(self, topic, value, key=None):
         self.producer.send(topic, value, key=key).add_callback(
-            self.on_send_success).add_errback(self.on_send_error)
+            self.on_send_success
+        ).add_errback(self.on_send_error)
 
     def consume(self, *topics, group_id=None):
         self.consumer.subscribe(topics)
         if group_id:
-            self.consumer.config['group_id'] = group_id
+            self.consumer.config["group_id"] = group_id
         for msg in self.consumer:
             self.consumer.poll(0)
             print(msg.value)
             yield msg.value
 
     def on_send_success(self, record_metadata):
-        self.logger.info('Message delivered to {} [{}]'.format(
-            record_metadata.topic, record_metadata.partition))
+        self.logger.info(
+            "Message delivered to {} [{}]".format(
+                record_metadata.topic, record_metadata.partition
+            )
+        )
 
     def on_send_error(self, exc):
-        self.logger.error('I am an errback', exc_info=exc)
+        self.logger.error("I am an errback", exc_info=exc)
 
 
 async def conn_aiomysql():
