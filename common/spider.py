@@ -18,11 +18,12 @@ from utils.tools import LazyProperty
 from common.settings import Settings
 from common.request import aiorequest
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 else:
     try:
         import uvloop
+
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     except ImportError:
         pass
@@ -30,7 +31,7 @@ else:
 
 class RequestBody(NamedTuple):
     url: str
-    method: str = 'GET'
+    method: str = "GET"
     headers: Dict[str, Any] = {}
     params: Any = None
     data: Any = None
@@ -38,9 +39,9 @@ class RequestBody(NamedTuple):
 
 
 class AsyncSpider(Settings):
-    """异步爬虫，支持异步上下文管理器
-    """
-    def __init__(self, logger=None, env='test') -> None:
+    """异步爬虫，支持异步上下文管理器"""
+
+    def __init__(self, logger=None, env="test") -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.sem = asyncio.Semaphore(self.concurrency)
         self.logger = logger or loguru.logger
@@ -66,41 +67,42 @@ class AsyncSpider(Settings):
             "http://ycrawl.91cyt.com/api/v1/pdd/common/randomAndroidUa",
         ]
         url = random.choice(random_ua_links)
-        if ua_type == 'web':
+        if ua_type == "web":
             url = "http://ycrawl.91cyt.com/api/v1/pdd/common/randomUa"
         try:
             async with async_timeout.timeout(self.timeout):
                 async with self.session.get(url) as resp:
                     res = await resp.json()
-            ua = res['data']
+            ua = res["data"]
             return ua
         except Exception as e:
             self.logger.warning(f"获取ua出错：{repr(e)},将使用默认ua")
             return self.default_ua[self.ua_type]
 
-    async def get_proxy(self, proxy_type='pinzan'):
-        assert proxy_type in {'pinzan', 'dubsix', '2808', 'liebaoV1', ''}
+    async def get_proxy(self, proxy_type="pinzan"):
+        assert proxy_type in {"pinzan", "dubsix", "2808", "liebaoV1", ""}
         if not proxy_type:
-            return ''
-        url = 'http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1'.format(
-            proxy_type)
+            return ""
+        url = "http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1".format(
+            proxy_type
+        )
         for _ in range(self.retry_time):
             try:
                 async with async_timeout.timeout(self.timeout):
-                    async with self.session.request('GET', url) as res:
+                    async with self.session.request("GET", url) as res:
                         result = await res.json()
             except Exception as e:
-                self.logger.error(f'获取代理出错：{repr(e)}')
+                self.logger.error(f"获取代理出错：{repr(e)}")
             else:
-                proxy = result.get('data')
+                proxy = result.get("data")
                 if proxy:
-                    return 'http://' + proxy
+                    return "http://" + proxy
 
     async def request(
         self,
         url,
         headers=None,
-        method='GET',
+        method="GET",
         data=None,
         params=None,
         callback=None,
@@ -108,10 +110,10 @@ class AsyncSpider(Settings):
         if not headers:
             headers = self.default_headers
             ua = await self.get_ua(ua_type=self.ua_type)
-            headers['User-Agent'] = ua
+            headers["User-Agent"] = ua
         for _ in range(self.retry_time):
             proxy = await self.get_proxy(proxy_type=self.proxy)
-            if proxy or proxy == '':
+            if proxy or proxy == "":
                 async with self.sem:
                     res = await aiorequest(
                         url,
@@ -187,14 +189,15 @@ class AsyncSpider(Settings):
                 else:
                     self.worker_tasks.append(request_item)
                     if self.request_queue.empty():
-                        results = await asyncio.gather(*self.worker_tasks,
-                                                       return_exceptions=True)
+                        results = await asyncio.gather(
+                            *self.worker_tasks,
+                            return_exceptions=True,
+                        )
                         self.worker_tasks = []
                         for result in results:
                             if not isinstance(result, RuntimeError) and result:
                                 callback_results, response = result
-                                await self.process_callback(
-                                    callback_results, response)
+                                await self.process_callback(callback_results, response)
             else:
                 if isinstance(request_item, (dict, str)):
                     await self.run_in_executor(self.process_item, request_item)
@@ -219,7 +222,7 @@ class AsyncSpider(Settings):
         #     await self.request_queue.put(None)
 
     async def start_requests(self):
-        yield self.Request('https://pyhton.org')
+        yield self.Request("https://pyhton.org")
 
     async def run(self):
         consumers = [
@@ -246,7 +249,8 @@ class AsyncSpider(Settings):
             # Display logs about this crawl task
             end_time = datetime.now()
             self.logger.info(
-                f"Total requests: {self.failed_counts + self.success_counts}")
+                f"Total requests: {self.failed_counts + self.success_counts}"
+            )
 
             if self.failed_counts:
                 self.logger.info(f"Failed requests: {self.failed_counts}")
@@ -254,7 +258,7 @@ class AsyncSpider(Settings):
             self.logger.info("Spider finished!")
 
     @classmethod
-    def start(cls, logger=None, loop=None, close_event_loop=True, env='test'):
+    def start(cls, logger=None, loop=None, close_event_loop=True, env="test"):
         spider = cls(logger=logger, env=env)
         # if sys.version_info > (3, 6):
         #     asyncio.run(spider._start())
