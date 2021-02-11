@@ -52,7 +52,7 @@ class AsyncSpider(Settings):
         # self.env = env
         if env:
             self.redis_client = RedisClient(env)
-            self.kafka_client = KafkaClient(env)
+        # self.kafka_client = KafkaClient(env)
 
     # @LazyProperty
     # def redis_client(self):
@@ -172,8 +172,8 @@ class AsyncSpider(Settings):
                 self.key,
                 ujson.dumps(result, ensure_ascii=False),
             )
-        if self.topic:
-            self.kafka_client.produce(self.topic, value=result)
+        # if self.topic:
+        #     self.kafka_client.produce(self.topic, value=result)
 
     async def request_worker(self, is_gather=True):
         worker_tasks = []
