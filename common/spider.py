@@ -162,7 +162,7 @@ class AsyncSpider(Settings):
         """
         解析response
         """
-        return response
+        return response.json()
 
     def process_item(self, result):
         """
