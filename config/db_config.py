@@ -15,6 +15,7 @@ redis_15 = {
     # 'db': 1,
     "decode_responses": True,
 }
+
 aioredis_test = {
     "address": ("localhost", 6379),
     "password": None,
