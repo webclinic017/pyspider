@@ -103,7 +103,7 @@ class CrawlFindGoods(AsyncSpider):
 
     def parse(self, response):
         result = response.json()
-        return result
+        print(result)
 
 
 if __name__ == "__main__":
