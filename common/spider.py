@@ -190,7 +190,7 @@ class AsyncSpider(Settings):
                     worker_tasks.append(request_item)
                     if self.request_queue.empty():
                         results = await asyncio.gather(
-                            *self.worker_tasks,
+                            *worker_tasks,
                             return_exceptions=True,
                         )
                         worker_tasks = []
