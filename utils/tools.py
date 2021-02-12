@@ -4,6 +4,7 @@ import re
 import string
 from collections.abc import Mapping, MutableSequence
 from typing import Any
+from functools import wraps
 
 _ITERABLE_SINGLE_VALUES = dict, str, bytes
 
@@ -12,7 +13,7 @@ def arglist_to_dict(arglist):
     """Convert a list of arguments like ['arg1=val1', 'arg2=val2', ...] to a
     dict
     """
-    return dict(x.split('=', 1) for x in arglist)
+    return dict(x.split("=", 1) for x in arglist)
 
 
 def regex(x):
@@ -42,33 +43,32 @@ def arg_to_iter(arg):
     """
     if arg is None:
         return []
-    elif not isinstance(arg, _ITERABLE_SINGLE_VALUES) and hasattr(
-            arg, '__iter__'):
+    elif not isinstance(arg, _ITERABLE_SINGLE_VALUES) and hasattr(arg, "__iter__"):
         return arg
     else:
         return [arg]
 
 
 def gen_random_str(length):
-    return "".join(
-        random.sample(string.ascii_lowercase + string.digits, length))
+    return "".join(random.sample(string.ascii_lowercase + string.digits, length))
 
 
 class LazyProperty:
     """
     延迟加载实例属性,只会在第一次调用时才会初始化
     """
+
     def __init__(self, method):
-        self.method = method
+        self.method = wraps(method)
         self.method_name = method.__name__
-        print(f'function overridden:{self.method}')
-        print(f'function name:{self.method_name}')
+        print(f"function overridden:{self.method}")
+        print(f"function name:{self.method_name}")
 
     def __get__(self, obj, cls):
         if not obj:
             return self
         value = self.method(obj)
-        print(f'value:{value}')
+        print(f"value:{value}")
         setattr(obj, self.method_name, value)
         return value
 
@@ -77,6 +77,7 @@ class FrozenJson:
     """
     使用属性表示法访问json对象
     """
+
     def __new__(cls, arg) -> Any:
         if isinstance(arg, Mapping):
             return super().__new__(cls)
@@ -89,7 +90,7 @@ class FrozenJson:
         self._data = {}
         for key, value in mapping.items():
             if keyword.iskeyword(key):
-                key += '_'
+                key += "_"
             self._data[key] = value
 
     def __getattr__(self, name):
@@ -106,6 +107,7 @@ class SingletonType(type):
     """
     单例元类
     """
+
     _instances = {}
 
     def __call__(cls, *args: Any, **kwds: Any) -> Any:
