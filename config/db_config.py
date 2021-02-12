@@ -16,6 +16,14 @@ redis_15 = {
     "decode_responses": True,
 }
 
+redis_30 = {
+    "host": "172.16.0.30",
+    "port": 6379,
+    "password": "20A3NBVJnWZtNzxumYOz",
+    # 'db': 1,
+    "decode_responses": True,
+}
+
 aioredis_test = {
     "address": ("localhost", 6379),
     "password": None,
@@ -47,6 +55,7 @@ kafka_test = {
 REDIS_CONF = {
     "test": redis_test,
     "redis15": redis_15,
+    "redis30": redis_30,
     "aio_test": aioredis_test,
     "aio_redis15": aioredis_15,
 }
