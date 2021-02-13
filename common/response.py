@@ -16,7 +16,7 @@ class RequestBody(NamedTuple):
 class Response:
     # __slots__ = ("text", "ok", "headers", "status", "meta", "request_body")
 
-    def __init__(self, url, method, text, status, meta, request_body) -> None:
+    def __init__(self, url, method, text, status, meta, request_body, callback) -> None:
         self.url = url
         self.method = method
         self.text = text
@@ -24,7 +24,7 @@ class Response:
         self.meta = meta
         self.request = request_body
         self.headers = request_body.headers
-        self.callback = request_body.callback
+        self.callback = callback
 
     def json(self):
         return ujson.loads(self.text)

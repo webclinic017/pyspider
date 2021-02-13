@@ -46,14 +46,13 @@ class Request:
             params=params,
             data=data,
             proxy=proxy,
-            callback=callback,
-            meta=meta,
         )
         self.timeout = timeout
         self.url = url
         self.method = method
         self.logger = logger or loguru.logger
         self.meta = meta
+        self.callback = callback
 
     async def fetch(self):
         try:
@@ -72,6 +71,7 @@ class Request:
                 resp.status,
                 meta=self.meta,
                 request_body=self.request_body,
+                callback=self.callback,
             )
             return res
         finally:
