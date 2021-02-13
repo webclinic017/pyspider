@@ -44,25 +44,26 @@ class ExampleSpider(AsyncSpider):
             "PAZfwKy",
         ]
         for shop_id in shop_list[:]:
-            for page in range(1, 5):
-                url = f"https://ec.snssdk.com/shop/goodsList?shop_id={shop_id}&size=10&page={page}&b_type_new=0&device_id=0&is_outside=1"
-                method = "GET"
-                headers = self.make_headers()
-                yield self.Request(
-                    url,
-                    method,
-                    headers,
-                    callback=self.parse,
-                )
-        # url = 'http://quotes.toscrape.com/page/1/'
-        # yield self.Request(url, callback=self.parse)
+            meta = {"page": 1, "shop_id": shop_id}
+            url = f"https://ec.snssdk.com/shop/goodsList?shop_id={meta['shop_id']}&size=10&page={meta['page']}&b_type_new=0&device_id=0&is_outside=1"
+            method = "GET"
+            headers = self.make_headers()
+            yield self.Request(
+                url,
+                method,
+                headers,
+                callback=self.parse,
+                meta=meta,
+            )
 
     async def parse(self, res):
-        self.logger.info(res.text)
-        yield res.text
-        for i in range(2, 4):
-            url = f"http://quotes.toscrape.com/page/{i}/"
-            yield self.Request(url, callback=self.parse_item)
+        r = res.json()["data"]["list"]
+        print(res.json())
+        meta = res.meta
+        if r:
+            meta["page"] += 1
+            url = f"https://ec.snssdk.com/shop/goodsList?shop_id={meta['shop_id']}&size=10&page={meta['page']}&b_type_new=0&device_id=0&is_outside=1"
+            yield res.follow(url, meta=meta)
 
     def parse_item(self, res):
         self.logger.info(res.text)

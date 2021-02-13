@@ -1,12 +1,11 @@
 import asyncio
 import sys
-from typing import Any, NamedTuple
 
 import aiohttp
 import async_timeout
-import ujson
 from aiohttp import ClientSession, TCPConnector
 import loguru
+from .response import Response, RequestBody
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -17,29 +16,6 @@ else:
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     except ImportError:
         pass
-
-
-class Response:
-    __slots__ = ("text", "ok", "headers", "status", "meta")
-
-    def __init__(self, text, ok, headers, status, meta) -> None:
-        self.text = text
-        self.ok = ok
-        self.headers = dict(headers)
-        self.status = status
-        self.meta = meta
-
-    def json(self):
-        return ujson.loads(self.text)
-
-
-class RequestBody(NamedTuple):
-    url: str
-    method: str = "GET"
-    headers: Any = None
-    params: Any = None
-    data: Any = None
-    proxy: Any = None
 
 
 class Request:
@@ -55,6 +31,7 @@ class Request:
         timeout=5,
         logger=None,
         meta=None,
+        callback=None,
     ) -> None:
         self.close_request_session = False
         if not session:
@@ -69,9 +46,12 @@ class Request:
             params=params,
             data=data,
             proxy=proxy,
+            callback=callback,
+            meta=meta,
         )
         self.timeout = timeout
         self.url = url
+        self.method = method
         self.logger = logger or loguru.logger
         self.meta = meta
 
@@ -79,13 +59,20 @@ class Request:
         try:
             async with async_timeout.timeout(self.timeout):
                 async with self.session.request(**self.request_body._asdict()) as resp:
-                    result = await resp.text()
+                    text = await resp.text()
         except aiohttp.ClientHttpProxyError as e:
             self.logger.error(f"代理出错：{repr(e)}")
         except Exception as e:
             self.logger.error(f"请求{self.url}出错:{repr(e)}")
         else:
-            res = Response(result, resp.ok, resp.headers, resp.status, meta=self.meta)
+            res = Response(
+                self.url,
+                self.method,
+                text,
+                resp.status,
+                meta=self.meta,
+                request_body=self.request_body,
+            )
             return res
         finally:
             await self._close_request()
@@ -93,6 +80,31 @@ class Request:
     async def _close_request(self):
         if self.close_request_session:
             await self.session.close()
+
+    def copy(self):
+        """Return a copy of this Request"""
+        return self.replace()
+
+    def replace(self, *args, **kwargs):
+        """Create a new Request with the same attributes except for those
+        given new values.
+        """
+        for x in [
+            "url",
+            "method",
+            "headers",
+            "params",
+            "data",
+            "proxy",
+            "session",
+            "timeout",
+            "logger",
+            "meta",
+            "callback",
+        ]:
+            kwargs.setdefault(x, getattr(self, x))
+        cls = kwargs.pop("cls", self.__class__)
+        return cls(*args, **kwargs)
 
     @classmethod
     async def request(
@@ -107,6 +119,7 @@ class Request:
         timeout=20,
         logger=None,
         meta=None,
+        callback=None,
     ):
         res = await cls(
             url,
@@ -119,6 +132,7 @@ class Request:
             timeout,
             logger=logger,
             meta=meta,
+            callback=callback,
         ).fetch()
         return res
 

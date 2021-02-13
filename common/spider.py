@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from inspect import isasyncgen, isgenerator
 from types import AsyncGeneratorType
-from typing import Any, Awaitable, Dict, NamedTuple
+from typing import Awaitable
 
 import aiohttp
 import async_timeout
@@ -13,9 +13,10 @@ import loguru
 import ujson
 from aiohttp import ClientSession
 from config import KafkaClient, RedisClient
-from utils.tools import LazyProperty
 
-from common.request import aiorequest
+# from utils.tools import LazyProperty
+
+from common.request import aiorequest, RequestBody
 from common.settings import Settings
 
 if sys.platform == "win32":
@@ -27,16 +28,6 @@ else:
         asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
     except ImportError:
         pass
-
-
-class RequestBody(NamedTuple):
-    url: str
-    method: str = "GET"
-    headers: Dict[str, Any] = {}
-    params: Any = None
-    data: Any = None
-    callback: Any = None
-    meta: Dict = {}
 
 
 class AsyncSpider(Settings):
@@ -128,6 +119,7 @@ class AsyncSpider(Settings):
                         session=self.session,
                         logger=self.logger,
                         meta=meta,
+                        callback=callback,
                     )
                     await asyncio.sleep(self.delay)
                     if not res:
