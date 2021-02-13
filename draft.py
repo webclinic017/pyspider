@@ -17,12 +17,12 @@ import asyncio
 
 
 class A:
-    async def test(self):
-        await asyncio.sleep(1)
+    def test(self):
+        # await asyncio.sleep(1)
         yield 1
 
 
-from inspect import isawaitable, iscoroutinefunction
+from inspect import isawaitable, iscoroutinefunction,isgeneratorfunction,isasyncgenfunction
 
 a = A().test
-print(iscoroutinefunction(a))
+print(isgeneratorfunction(a))
