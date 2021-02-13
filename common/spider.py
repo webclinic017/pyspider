@@ -106,6 +106,7 @@ class AsyncSpider(Settings):
         data=None,
         params=None,
         callback=None,
+        meta=None,
     ):
         if not headers:
             headers = self.default_headers
@@ -125,6 +126,7 @@ class AsyncSpider(Settings):
                         timeout=self.timeout,
                         session=self.session,
                         logger=self.logger,
+                        meta=meta,
                     )
                     await asyncio.sleep(self.delay)
                     if not res:

@@ -20,13 +20,14 @@ else:
 
 
 class Response:
-    __slots__ = ("text", "ok", "headers", "status")
+    __slots__ = ("text", "ok", "headers", "status", "meta")
 
-    def __init__(self, text, ok, headers, status) -> None:
+    def __init__(self, text, ok, headers, status, meta) -> None:
         self.text = text
         self.ok = ok
         self.headers = dict(headers)
         self.status = status
+        self.meta = meta
 
     def json(self):
         return ujson.loads(self.text)
@@ -53,6 +54,7 @@ class Request:
         session=None,
         timeout=5,
         logger=None,
+        meta=None,
     ) -> None:
         self.close_request_session = False
         if not session:
@@ -71,6 +73,7 @@ class Request:
         self.timeout = timeout
         self.url = url
         self.logger = logger or loguru.logger
+        self.meta = meta
 
     async def fetch(self):
         try:
@@ -82,7 +85,7 @@ class Request:
         except Exception as e:
             self.logger.error(f"请求{self.url}出错:{repr(e)}")
         else:
-            res = Response(result, resp.ok, resp.headers, resp.status)
+            res = Response(result, resp.ok, resp.headers, resp.status, meta=self.meta)
             return res
         finally:
             await self._close_request()
@@ -103,6 +106,7 @@ class Request:
         session=None,
         timeout=20,
         logger=None,
+        meta=None,
     ):
         res = await cls(
             url,
@@ -114,6 +118,7 @@ class Request:
             session,
             timeout,
             logger=logger,
+            meta=meta,
         ).fetch()
         return res
 
