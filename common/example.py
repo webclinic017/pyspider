@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append("C:\\Users\\86156\\Desktop\\pyspider")
+sys.path.append("..")
 from common.spider import AsyncSpider
 from utils.log import get_logger
 
