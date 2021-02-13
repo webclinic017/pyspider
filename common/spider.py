@@ -99,6 +99,7 @@ class AsyncSpider(Settings):
         params=None,
         callback=None,
         meta=None,
+        **kwargs,
     ):
         if not headers:
             headers = self.default_headers
