@@ -8,7 +8,7 @@ logger = get_logger("example_spider")
 
 
 class ExampleSpider(AsyncSpider):
-    proxy = ""
+    proxy = "pinzan"
     worker_numbers = 4
     concurrency = 16
     retry_time = 1
