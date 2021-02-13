@@ -14,10 +14,12 @@ import ujson
 from aiohttp import ClientSession
 from config import KafkaClient, RedisClient
 
+from common.request import aiorequest
+from common.response import RequestBody
+from common.settings import Settings
+
 # from utils.tools import LazyProperty
 
-from common.request import aiorequest, RequestBody
-from common.settings import Settings
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())

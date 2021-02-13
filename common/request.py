@@ -46,6 +46,8 @@ class Request:
             params=params,
             data=data,
             proxy=proxy,
+            meta=meta,
+            callback=callback,
         )
         self.timeout = timeout
         self.url = url
@@ -53,11 +55,22 @@ class Request:
         self.logger = logger or loguru.logger
         self.meta = meta
         self.callback = callback
+        self.headers = headers
+        self.params = params
+        self.data = data
+        self.proxy = proxy
 
     async def fetch(self):
         try:
             async with async_timeout.timeout(self.timeout):
-                async with self.session.request(**self.request_body._asdict()) as resp:
+                async with self.session.request(
+                    self.method,
+                    self.url,
+                    headers=self.headers,
+                    params=self.params,
+                    data=self.data,
+                    proxy=self.proxy,
+                ) as resp:
                     text = await resp.text()
         except aiohttp.ClientHttpProxyError as e:
             self.logger.error(f"代理出错：{repr(e)}")
