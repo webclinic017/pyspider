@@ -11,7 +11,7 @@ class ExampleSpider(AsyncSpider):
     proxy = "pinzan"
     worker_numbers = 4
     concurrency = 16
-    retry_time = 1
+    retry_time = 3
     redis_env = ""
 
     @staticmethod
