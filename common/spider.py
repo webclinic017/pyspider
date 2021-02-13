@@ -144,6 +144,8 @@ class AsyncSpider(Settings):
             elif isgenerator(callback_results):
                 for callback_result in callback_results:
                     await self._process_callback(callback_result)
+            else:
+                await self._process_callback(callback_results)
         except Exception as e:
             self.logger.exception(e)
 
