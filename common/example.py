@@ -12,7 +12,7 @@ class ExampleSpider(AsyncSpider):
     worker_numbers = 4
     concurrency = 16
     retry_time = 1
-    redis_env = "test"
+    redis_env = ""
 
     @staticmethod
     def make_headers():
