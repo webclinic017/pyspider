@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append("..")
+sys.path.append("C:\\Users\\86156\\Desktop\\pyspider")
 from common.spider import AsyncSpider
 from utils.log import get_logger
 
@@ -63,7 +63,7 @@ class ExampleSpider(AsyncSpider):
         if r:
             meta["page"] += 1
             url = f"https://ec.snssdk.com/shop/goodsList?shop_id={meta['shop_id']}&size=10&page={meta['page']}&b_type_new=0&device_id=0&is_outside=1"
-            yield res.follow(url, meta=meta)
+            return res.follow(url, meta=meta)
 
     # def parse_item(self, res):
     #     self.logger.info(res.text)

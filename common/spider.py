@@ -3,7 +3,7 @@ import random
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from inspect import isasyncgen, isgenerator
+from inspect import isasyncgen, iscoroutinefunction, isgenerator
 from types import AsyncGeneratorType
 from typing import Awaitable
 
@@ -130,7 +130,11 @@ class AsyncSpider(Settings):
                     else:
                         self.success_counts += 1
                         result = None
-                        if callable(callback):
+                        if not callable(callback):
+                            raise TypeError("callback must be callable!")
+                        if iscoroutinefunction(callback):
+                            result = await callback(res)
+                        else:
                             result = callback(res)
                         return result, res
             else:
