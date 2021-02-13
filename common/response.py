@@ -16,14 +16,13 @@ class RequestBody(NamedTuple):
 class Response:
     # __slots__ = ("text", "ok", "headers", "status", "meta", "request_body")
 
-    def __init__(self, url, method, text, status, meta, request_body, callback) -> None:
+    def __init__(self, url, method, headers, text, status, meta, callback) -> None:
         self.url = url
         self.method = method
         self.text = text
         self.status = status
         self.meta = meta
-        self.request = request_body
-        self.headers = request_body.headers
+        self.headers = headers
         self.callback = callback
 
     def json(self):

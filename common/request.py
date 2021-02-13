@@ -5,7 +5,7 @@ import aiohttp
 import async_timeout
 from aiohttp import ClientSession, TCPConnector
 import loguru
-from .response import Response, RequestBody
+from .response import Response
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -39,16 +39,6 @@ class Request:
             self.close_request_session = True
         else:
             self.session = session
-        self.request_body = RequestBody(
-            url,
-            method,
-            headers=headers,
-            params=params,
-            data=data,
-            proxy=proxy,
-            meta=meta,
-            callback=callback,
-        )
         self.timeout = timeout
         self.url = url
         self.method = method
@@ -80,10 +70,10 @@ class Request:
             res = Response(
                 self.url,
                 self.method,
+                self.headers,
                 text,
                 resp.status,
                 meta=self.meta,
-                request_body=self.request_body,
                 callback=self.callback,
             )
             return res
@@ -93,31 +83,6 @@ class Request:
     async def _close_request(self):
         if self.close_request_session:
             await self.session.close()
-
-    def copy(self):
-        """Return a copy of this Request"""
-        return self.replace()
-
-    def replace(self, *args, **kwargs):
-        """Create a new Request with the same attributes except for those
-        given new values.
-        """
-        for x in [
-            "url",
-            "method",
-            "headers",
-            "params",
-            "data",
-            "proxy",
-            "session",
-            "timeout",
-            "logger",
-            "meta",
-            "callback",
-        ]:
-            kwargs.setdefault(x, getattr(self, x))
-        cls = kwargs.pop("cls", self.__class__)
-        return cls(*args, **kwargs)
 
     @classmethod
     async def request(
