@@ -36,6 +36,7 @@ class RequestBody(NamedTuple):
     params: Any = None
     data: Any = None
     callback: Any = None
+    meta: Dict = {}
 
 
 class AsyncSpider(Settings):
