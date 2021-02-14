@@ -198,7 +198,7 @@ class AsyncSpider(Settings):
                             *worker_tasks,
                             return_exceptions=True,
                         )
-                        worker_tasks = []
+                        worker_tasks.clear()
                         for result in results:
                             if not isinstance(result, RuntimeError) and result:
                                 callback_results, response = result
