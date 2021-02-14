@@ -14,7 +14,7 @@ class RequestBody(NamedTuple):
 
 
 class Response:
-    # __slots__ = ("text", "ok", "headers", "status", "meta", "request_body")
+    __slots__ = ("url", "method", "headers", "status", "meta", "text", "callback")
 
     def __init__(self, url, method, headers, text, status, meta, callback) -> None:
         self.url = url
