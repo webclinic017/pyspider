@@ -9,7 +9,6 @@ def get_cat_info(url):
     获取分类信息
     """
     cate_list = []
-    url = "https://mobile.yangkeduo.com/sbxeghhl.html"
     headers = {
         "authority": "mobile.yangkeduo.com",
         "upgrade-insecure-requests": "1",
