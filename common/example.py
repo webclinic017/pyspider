@@ -9,7 +9,6 @@ logger = get_logger("example_spider")
 
 class ExampleSpider(AsyncSpider):
     proxy = "pinzan"
-    worker_numbers = 4
     concurrency = 16
     retry_time = 3
     redis_env = ""
@@ -56,7 +55,7 @@ class ExampleSpider(AsyncSpider):
                 meta=meta,
             )
 
-    async def parse(self, res):
+    def parse(self, res):
         r = res.json()["data"]["list"]
         print(res.json())
         meta = res.meta
