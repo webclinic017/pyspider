@@ -1,4 +1,5 @@
 import random
+import loguru
 
 
 class Settings:
@@ -10,6 +11,7 @@ class Settings:
     # 消费者数量
     worker_numbers = 4
     timeout = 5
+    logger = loguru.logger
     redis_env = ""
     key = None
     kafka_env = ""

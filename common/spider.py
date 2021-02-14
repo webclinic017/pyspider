@@ -35,10 +35,9 @@ else:
 class AsyncSpider(Settings):
     """异步爬虫，支持异步上下文管理器"""
 
-    def __init__(self, logger=None) -> None:
+    def __init__(self) -> None:
         self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.sem = asyncio.Semaphore(self.concurrency)
-        self.logger = logger or loguru.logger
         self.request_queue = asyncio.Queue()
         self.executor = ThreadPoolExecutor()
         self.Request = RequestBody
@@ -263,8 +262,8 @@ class AsyncSpider(Settings):
             self.logger.info("Spider finished!")
 
     @classmethod
-    def start(cls, logger=None, loop=None, close_event_loop=True):
-        spider = cls(logger=logger)
+    def start(cls, loop=None, close_event_loop=True):
+        spider = cls()
         # if sys.version_info > (3, 6):
         #     asyncio.run(spider._start())
         # else:

@@ -12,6 +12,7 @@ class ExampleSpider(AsyncSpider):
     concurrency = 16
     retry_time = 3
     redis_env = ""
+    logger = logger
 
     @staticmethod
     def make_headers():
@@ -68,4 +69,4 @@ class ExampleSpider(AsyncSpider):
     #     self.logger.info(res.text)
 
 
-ExampleSpider.start(logger=logger)
+ExampleSpider.start()
