@@ -9,7 +9,6 @@ from typing import Awaitable
 
 import aiohttp
 import async_timeout
-import loguru
 import ujson
 from aiohttp import ClientSession
 from config import KafkaClient, RedisClient
