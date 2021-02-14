@@ -4,15 +4,13 @@ sys.path.append("..")
 from common.spider import AsyncSpider
 from utils.log import get_logger
 
-logger = get_logger("example_spider")
-
 
 class ExampleSpider(AsyncSpider):
     proxy = "pinzan"
     concurrency = 16
     retry_time = 3
     redis_env = ""
-    logger = logger
+    logger = get_logger("example_spider")
 
     @staticmethod
     def make_headers():
