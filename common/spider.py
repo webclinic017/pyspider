@@ -78,17 +78,16 @@ class AsyncSpider(Settings):
         url = "http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1".format(
             proxy_type
         )
-        for _ in range(self.retry_time):
-            try:
-                async with async_timeout.timeout(self.timeout):
-                    async with self.session.request("GET", url) as res:
-                        result = await res.json()
-            except Exception as e:
-                self.logger.error(f"获取代理出错：{repr(e)}")
-            else:
-                proxy = result.get("data")
-                if proxy:
-                    return "http://" + proxy
+        try:
+            async with async_timeout.timeout(self.timeout):
+                async with self.session.request("GET", url) as res:
+                    result = await res.json()
+        except Exception as e:
+            self.logger.error(f"获取代理出错：{repr(e)}")
+        else:
+            proxy = result.get("data")
+            if proxy:
+                return "http://" + proxy
 
     async def request(
         self,
