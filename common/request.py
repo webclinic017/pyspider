@@ -94,7 +94,7 @@ class Request:
         data=None,
         proxy=None,
         session=None,
-        timeout=20,
+        timeout=5,
         logger=None,
         meta=None,
         callback=None,
