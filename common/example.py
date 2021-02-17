@@ -1,12 +1,13 @@
 import sys
+import os
 
-sys.path.append("..")
+sys.path.append(os.getcwd())
 from common.spider import AsyncSpider
 from utils.log import get_logger
 
 
 class ExampleSpider(AsyncSpider):
-    proxy = "pinzan"
+    proxy = ""
     concurrency = 16
     retry_time = 3
     redis_env = ""
