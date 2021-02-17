@@ -6,3 +6,4 @@ logs
 env/
 .spyproject
 draft.py
+.vs
