@@ -7,21 +7,22 @@ import time
 
 
 def get_logger(name):
-    if sys.platform == 'win32':
-        base_dir = 'D:\\logs'
+    if sys.platform == "win32":
+        base_dir = "D:\\logs\\pyspider"
     else:
-        base_dir = '/data/logs'
+        base_dir = "/data/logs/pyspider"
     if not os.path.exists(base_dir):
         os.mkdir(base_dir)
     logger = logging.getLogger(name)
-    file_name = str(datetime.date.today()) + '.log'
+    file_name = str(datetime.date.today()) + ".log"
     logger.setLevel(logging.DEBUG)
     # create console handler and set level to debug
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     # create formatter
     formatter = logging.Formatter(
-        '[%(asctime)s] %(levelname)s %(filename)s %(lineno)s %(message)s')
+        "[%(asctime)s] %(levelname)s %(filename)s %(lineno)s %(message)s"
+    )
     # add formatter to ch
     ch.setFormatter(formatter)
     logger.addHandler(ch)
@@ -29,8 +30,7 @@ def get_logger(name):
     if not os.path.exists(log_path):
         os.mkdir(log_path)
     log_file_path = os.path.join(log_path, file_name)
-    handler = logging.handlers.RotatingFileHandler(log_file_path,
-                                                   maxBytes=1024 * 1024)
+    handler = logging.handlers.RotatingFileHandler(log_file_path, maxBytes=1024 * 1024)
     dir_list = [os.path.join(log_path, file) for file in os.listdir(log_path)]
     for log in dir_list:
         create_time = int(os.path.getctime(log))
