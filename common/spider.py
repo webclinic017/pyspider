@@ -126,7 +126,6 @@ class AsyncSpider(Settings):
                         self.failed_counts += 1
                     else:
                         self.success_counts += 1
-                        result = None
                         if not callable(callback):
                             raise TypeError("callback must be callable!")
                         if iscoroutinefunction(callback):
