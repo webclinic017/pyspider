@@ -19,6 +19,7 @@ logger = get_logger("activity_find_goods")
 
 class CrawlFindGoods(AsyncSpider):
     key = "pdd_activity_find_goods"
+    redis_env = "redis15"
 
     @staticmethod
     def make_body(cate_info, anti_content, page):
