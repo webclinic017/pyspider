@@ -19,7 +19,6 @@ from common.settings import Settings
 
 # from utils.tools import LazyProperty
 
-
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 else:
@@ -126,7 +125,9 @@ class AsyncSpider(Settings):
                         self.failed_counts += 1
                     else:
                         self.success_counts += 1
-                        if not callable(callback):
+                        if callback is None:
+                            callback = self.parse
+                        elif not callable(callback):
                             raise TypeError("callback must be callable!")
                         if iscoroutinefunction(callback):
                             result = await callback(res)
