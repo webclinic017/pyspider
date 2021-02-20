@@ -69,7 +69,6 @@ class CrawlFindGoods(AsyncSpider):
 
     def parse(self, response):
         res = response.json()
-        print(res)
         try:
             data = res["result"]["data"]
         except:
