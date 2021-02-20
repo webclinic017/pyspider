@@ -61,6 +61,13 @@ class RedisClient(redis.Redis):
             return value
         return cache_data
 
+    def batch_lpop(self, key, n=100):
+        p = self.pipeline()
+        p.lrange(key, 0, n - 1)
+        p.ltrim(key, n, -1)
+        data = p.execute()
+        return data
+
 
 class MysqlClient:
     def __init__(self, env="test") -> None:
