@@ -175,6 +175,7 @@ class AsyncSpider(Settings):
                 self.key,
                 ujson.dumps(result, ensure_ascii=False),
             )
+            self.logger.info(f"保存数据到队列{self.key}成功！")
         if self.topic:
             self.kafka_client.produce(self.topic, value=result)
 
