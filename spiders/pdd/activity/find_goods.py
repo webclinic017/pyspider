@@ -1,7 +1,7 @@
-import time
 import itertools
 import json
 import sys
+import time
 from urllib.parse import quote
 
 if sys.platform == "win32":
@@ -9,12 +9,10 @@ if sys.platform == "win32":
 else:
     path = "/data/spider/pyspider"
 sys.path.append(path)
-
 from common.spider import AsyncSpider
 from service.pdd_risk import PddParamsProducer
+from spiders.pdd.activity.crawl_cate import get_cat_info
 from utils.log import get_logger
-
-from .crawl_cate import get_cat_info
 
 logger = get_logger("activity_find_goods")
 
