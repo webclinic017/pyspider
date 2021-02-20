@@ -112,13 +112,16 @@ class MysqlClient:
 
 
 class AioRedis:
-    def __init__(self, env="aio_test") -> None:
+    def __init__(self, env="aio_test", db=0) -> None:
         self.env = env
         self.client = None
+        self.db = db
 
     async def setup(self):
         try:
-            self.client = await aioredis.create_redis_pool(**REDIS_CONF[self.env])
+            self.client = await aioredis.create_redis_pool(
+                db=self.db, **REDIS_CONF[self.env]
+            )
             return self.client
         except Exception as e:
             raise Exception(f"异步redis连接失败:{e}")

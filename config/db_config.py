@@ -27,14 +27,14 @@ redis_30 = {
 aioredis_test = {
     "address": ("localhost", 6379),
     "password": None,
-    "db": 0,
+    # "db": 0,
     "encoding": "utf-8",
 }
 
 aioredis_15 = {
     "address": ("172.16.16.15", 6379),
     "password": "20A3NBVJnWZtNzxumYOz",
-    "db": 1,
+    # "db": 1,
     "encoding": "utf-8",
 }
 
