@@ -37,6 +37,12 @@ aioredis_15 = {
     # "db": 1,
     "encoding": "utf-8",
 }
+aioredis_30 = {
+    "address": ("172.16.0.30", 6379),
+    "password": "20A3NBVJnWZtNzxumYOz",
+    # "db": 1,
+    "encoding": "utf-8",
+}
 
 mysql_test = {
     "host": "localhost",
@@ -58,6 +64,7 @@ REDIS_CONF = {
     "redis30": redis_30,
     "aio_test": aioredis_test,
     "aio_redis15": aioredis_15,
+    "aio_redis30": aioredis_30,
 }
 
 MYSQL_CONF = {"test": mysql_test}

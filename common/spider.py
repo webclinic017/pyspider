@@ -11,7 +11,7 @@ import aiohttp
 import async_timeout
 import ujson
 from aiohttp import ClientSession
-from config import KafkaClient, RedisClient
+from config import AioRedis, KafkaClient, RedisClient
 
 from common.request import aiorequest
 from common.response import RequestBody
@@ -41,8 +41,8 @@ class AsyncSpider(Settings):
         self.Request = RequestBody
         self.loop = asyncio.get_event_loop()
         # self.env = env
-        if self.redis_env:
-            self.redis_client = RedisClient(self.redis_env)
+        if self.redis_env in ("test", "redis15", "redis30"):
+            self.redis_client = RedisClient(self.redis_env, self.redis_db)
         if self.kafka_env:
             self.kafka_client = KafkaClient(self.kafka_env)
 
@@ -246,10 +246,16 @@ class AsyncSpider(Settings):
     async def _start(self):
         self.logger.info("Spider started!")
         start_time = datetime.now()
+        r = None
+        if self.redis_env in ("aio_test", "aio_redis15", "aio_redis30"):
+            r = AioRedis(self.redis_env, self.redis_db)
+            self.redis_client = await r.setup()
         try:
             await self.run()
         finally:
             await self.close()
+            if r:
+                await r.close()
             # Display logs about this crawl task
             end_time = datetime.now()
             self.logger.info(

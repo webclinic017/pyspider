@@ -13,6 +13,7 @@ class Settings:
     timeout = 5
     logger = loguru.logger
     redis_env = ""
+    redis_db = 0
     key = None
     kafka_env = ""
     topic = None
