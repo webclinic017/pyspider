@@ -157,7 +157,8 @@ class AsyncSpider(Settings):
             self.request_queue.put_nowait(self.create_task(callback_result))
         elif isinstance(callback_result, (dict, str)):
             # Process target item
-            await self.run_in_executor(self.process_item, callback_result)
+            # await self.run_in_executor(self.process_item, callback_result)
+            self.process_item(callback_result)
 
     def parse(self, response):
         """
