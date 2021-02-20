@@ -7,10 +7,11 @@ from utils.log import get_logger
 
 
 class ExampleSpider(AsyncSpider):
-    proxy = ""
+    proxy = "pinzan"
     concurrency = 16
     retry_time = 3
-    redis_env = ""
+    key = "test"
+    redis_env = "aio_test"
     logger = get_logger("example_spider")
 
     @staticmethod
@@ -58,6 +59,7 @@ class ExampleSpider(AsyncSpider):
     def parse(self, res):
         r = res.json()["data"]["list"]
         print(res.json())
+        yield res.json()
         meta = res.meta
         if r:
             meta["page"] += 1

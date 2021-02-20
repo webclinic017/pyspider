@@ -9,6 +9,7 @@ from typing import Awaitable
 
 import aiohttp
 import async_timeout
+from aioredis import Redis
 import ujson
 from aiohttp import ClientSession
 from config import AioRedis, KafkaClient, RedisClient
@@ -41,6 +42,8 @@ class AsyncSpider(Settings):
         self.Request = RequestBody
         self.loop = asyncio.get_event_loop()
         # self.env = env
+        self.redis_client = None
+        self.aioredis_client = None
         if self.redis_env in ("test", "redis15", "redis30"):
             self.redis_client = RedisClient(self.redis_env, self.redis_db)
         elif self.redis_env in ("aio_test", "aio_redis15", "aio_redis30"):
@@ -161,7 +164,7 @@ class AsyncSpider(Settings):
         elif isinstance(callback_result, (dict, str)):
             # Process target item
             # await self.run_in_executor(self.process_item, callback_result)
-            self.process_item(callback_result)
+            await self.process_item(callback_result)
 
     def parse(self, response):
         """
@@ -169,15 +172,21 @@ class AsyncSpider(Settings):
         """
         return response.json()
 
-    def process_item(self, result):
+    async def process_item(self, result):
         """
         保存数据操作
         """
         if self.key:
-            self.redis_client.lpush(
-                self.key,
-                ujson.dumps(result, ensure_ascii=False),
-            )
+            if isinstance(self.redis_client, RedisClient):
+                self.redis_client.lpush(
+                    self.key,
+                    ujson.dumps(result, ensure_ascii=False),
+                )
+            elif isinstance(self.redis_client, Redis):
+                await self.redis_client.lpush(
+                    self.key,
+                    ujson.dumps(result, ensure_ascii=False),
+                )
             self.logger.info(f"保存数据到队列{self.key}成功！")
         if self.topic:
             self.kafka_client.produce(self.topic, value=result)
