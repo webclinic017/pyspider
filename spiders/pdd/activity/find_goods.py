@@ -1,3 +1,4 @@
+import time
 import itertools
 import json
 import sys
@@ -69,8 +70,16 @@ class CrawlFindGoods(AsyncSpider):
             )
 
     def parse(self, response):
-        result = response.json()
-        print(result)
+        res = response.json()
+        try:
+            data = res["result"]["data"]
+        except Exception as e:
+            self.logger.error(repr(e))
+        else:
+            if data:
+                if not res.get("errorMsg"):
+                    res["cache_time"] = int(time.time())
+                    return res
 
 
 if __name__ == "__main__":
