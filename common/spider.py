@@ -43,6 +43,9 @@ class AsyncSpider(Settings):
         # self.env = env
         if self.redis_env in ("test", "redis15", "redis30"):
             self.redis_client = RedisClient(self.redis_env, self.redis_db)
+        elif self.redis_env in ("aio_test", "aio_redis15", "aio_redis30"):
+            self.aioredis_client = AioRedis(self.redis_env, self.redis_db)
+
         if self.kafka_env:
             self.kafka_client = KafkaClient(self.kafka_env)
 
@@ -246,16 +249,12 @@ class AsyncSpider(Settings):
     async def _start(self):
         self.logger.info("Spider started!")
         start_time = datetime.now()
-        r = None
-        if self.redis_env in ("aio_test", "aio_redis15", "aio_redis30"):
-            r = AioRedis(self.redis_env, self.redis_db)
-            self.redis_client = await r.setup()
+        if self.aioredis_client:
+            self.redis_client = await self.aioredis_client.setup()
         try:
             await self.run()
         finally:
             await self.close()
-            if r:
-                await r.close()
             # Display logs about this crawl task
             end_time = datetime.now()
             self.logger.info(
@@ -303,6 +302,8 @@ class AsyncSpider(Settings):
             await self.session.close()
         if self.executor:
             self.executor.shutdown()
+        if self.aioredis_client:
+            await self.aioredis_client.close()
 
     async def __aenter__(self):
         return self
