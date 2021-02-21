@@ -50,7 +50,7 @@ class AsyncSpider(Settings):
             self.aioredis_client = AioRedis(self.redis_env, self.redis_db)
 
         if self.kafka_env:
-            self.kafka_client = KafkaClient(self.kafka_env)
+            self.kafka_client = KafkaClient(self.kafka_env, self.logger)
 
     # @LazyProperty
     # def redis_client(self):
