@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-import sys
 from contextlib import asynccontextmanager
 from json.decoder import JSONDecodeError
 
@@ -11,7 +10,6 @@ import kafka
 import pymysql
 import redis
 
-sys.path.append("..")
 from config.db_config import KAFKA_CONF, MYSQL_CONF, REDIS_CONF
 
 
