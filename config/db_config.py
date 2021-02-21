@@ -53,7 +53,7 @@ mysql_test = {
 }
 
 kafka_test = {
-    "bootstrap_servers": ["kafka01:9092, kafka02:9092, kafka03:9092"],
+    "bootstrap_servers": ["kafka01:9092", " kafka02:9092", "kafka03:9092"],
     "value_serializer": lambda m: json.dumps(m).encode("utf8"),
     "key_serializer": str.encode,
 }
