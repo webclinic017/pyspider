@@ -109,7 +109,9 @@ class AsyncSpider(Settings):
             headers = self.default_headers
             ua = await self.get_ua(ua_type=self.ua_type)
             headers["User-Agent"] = ua
-        for _ in range(1, self.retry_time + 1):
+        if self.retry_time <= 0:
+            self.retry_time = 1
+        for _ in range(self.retry_time):
             proxy = await self.get_proxy(proxy_type=self.proxy)
             if proxy or proxy == "":
                 async with self.sem:
