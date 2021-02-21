@@ -3,8 +3,8 @@ import random
 import re
 import string
 from collections.abc import Mapping, MutableSequence
-from typing import Any
 from functools import wraps
+from typing import Any
 
 _ITERABLE_SINGLE_VALUES = dict, str, bytes
 
