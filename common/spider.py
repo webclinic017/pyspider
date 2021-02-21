@@ -174,7 +174,7 @@ class AsyncSpider(Settings):
         """
         解析response
         """
-        return response.json()
+        return response.text
 
     async def process_item(self, result):
         """

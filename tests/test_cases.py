@@ -1,6 +1,9 @@
 import asyncio
 import sys
 import os
+
+import pytest
+
 sys.path.append(os.pardir)
 from common.spider import AsyncSpider
 from config.db_setup import RedisClient, MysqlClient, AioRedis, AioMysql
@@ -8,25 +11,22 @@ from config.db_setup import RedisClient, MysqlClient, AioRedis, AioMysql
 
 async def fetch_page():
     async with AsyncSpider() as spider:
-        res = await spider.request("https://python.org", return_type='text')
-        return res
+        data = await spider.request("https://python.org")
+        if data:
+            return data[1].text
 
 
 def test_async_spider():
     res = asyncio.run(fetch_page())
     # print(res)
-    assert 'python' in res
+    assert "python" in res
 
 
 def test_redis_client():
     redis_client = RedisClient()
-    new_var = 'pytest'
+    new_var = "pytest"
     cache_cycle = 60
-    redis_client.set_cache(new_var,
-                           'test',
-                           'test_pytest',
-                           cache_cycle=60,
-                           refresh=True)
+    redis_client.set_cache(new_var, "test", "test_pytest", cache_cycle=60, refresh=True)
     assert redis_client.exists(new_var) == 1
     assert redis_client.ttl(new_var) == cache_cycle
 
@@ -41,13 +41,13 @@ def test_mysql_client():
 
 async def conn_aioredis():
     async with AioRedis() as redis_client:
-        await redis_client.set('my_key', 'value')
-        return await redis_client.get('my_key')
+        await redis_client.set("my_key", "value")
+        return await redis_client.get("my_key")
 
 
 def test_aioredis():
     r = asyncio.run(conn_aioredis())
-    assert r == 'value'
+    assert r == "value"
 
 
 async def conn_aiomysql():
