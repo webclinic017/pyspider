@@ -13,7 +13,7 @@ import ujson
 from aiohttp import ClientSession
 from aioredis import Redis
 from config import AioRedis, KafkaClient, RedisClient
-from utils.log import get_logger
+from utils.log import get_loguru_logger
 
 from common.request import aiorequest
 from common.response import RequestBody
@@ -43,7 +43,7 @@ class AsyncSpider(Settings):
         self.Request = RequestBody
         self.loop = asyncio.get_event_loop()
         # self.env = env
-        self.logger = get_logger(self.logger_name)
+        self.logger = get_loguru_logger(self.logger_name)
         self.redis_client = None
         self.aioredis_client = None
         if self.redis_env in ("test", "redis15", "redis30"):

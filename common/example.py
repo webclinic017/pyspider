@@ -38,7 +38,6 @@ class ExampleSpider(AsyncSpider):
             "JlLHLNH",
             "wxATQZg",
             "zYfkZcb",
-            "zYfkZcb",
             "hxiESSw",
             "lVKMfKy",
             "qIvUBNX",

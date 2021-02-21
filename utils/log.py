@@ -4,15 +4,17 @@ import logging.handlers
 import os
 import sys
 import time
+from loguru import logger
+
+if sys.platform == "win32":
+    base_dir = "D:\\logs\\pyspider"
+else:
+    base_dir = "/data/logs/pyspider"
+if not os.path.exists(base_dir):
+    os.mkdir(base_dir)
 
 
 def get_logger(name):
-    if sys.platform == "win32":
-        base_dir = "D:\\logs\\pyspider"
-    else:
-        base_dir = "/data/logs/pyspider"
-    if not os.path.exists(base_dir):
-        os.mkdir(base_dir)
     logger = logging.getLogger(name)
     file_name = str(datetime.date.today()) + ".log"
     logger.setLevel(logging.DEBUG)
@@ -39,6 +41,17 @@ def get_logger(name):
     handler.setFormatter(formatter)
     handler.setLevel(logging.ERROR)
     logger.addHandler(handler)
+    return logger
+
+
+def get_loguru_logger(name):
+    file_name = str(datetime.date.today()) + ".log"
+    log_path = os.path.join(base_dir, name)
+    if not os.path.exists(log_path):
+        os.mkdir(log_path)
+    log_file_path = os.path.join(log_path, file_name)
+    formatter = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <6}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+    logger.add(log_file_path, level="ERROR", format=formatter, rotation="500 MB")
     return logger
 
 
