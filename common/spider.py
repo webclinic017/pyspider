@@ -180,17 +180,15 @@ class AsyncSpider(Settings):
         """
         保存数据操作
         """
+        if isinstance(result, dict):
+            data = ujson.dumps(result, ensure_ascii=False)
+        else:
+            data = result
         if self.key and self.redis_client:
             if isinstance(self.redis_client, RedisClient):
-                self.redis_client.lpush(
-                    self.key,
-                    ujson.dumps(result, ensure_ascii=False),
-                )
+                self.redis_client.lpush(self.key, data)
             elif isinstance(self.redis_client, Redis):
-                await self.redis_client.lpush(
-                    self.key,
-                    ujson.dumps(result, ensure_ascii=False),
-                )
+                await self.redis_client.lpush(self.key, data)
             self.logger.info(f"保存数据到队列{self.key}成功！")
         if self.topic:
             self.kafka_client.produce(self.topic, value=result)

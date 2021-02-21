@@ -10,7 +10,7 @@ class ExampleSpider(AsyncSpider):
     concurrency = 16
     retry_time = 3
     key = "test"
-    redis_env = ""
+    redis_env = "test"
     # topic = "test_kafka"
     # kafka_env = "test"
     logger_name = "example_spider"
@@ -56,15 +56,15 @@ class ExampleSpider(AsyncSpider):
                 meta=meta,
             )
 
-    def parse(self, res):
-        r = res.json()["data"]["list"]
-        print(res.json())
-        meta = res.meta
-        if r:
-            yield res.json()
-            meta["page"] += 1
-            url = f"https://ec.snssdk.com/shop/goodsList?shop_id={meta['shop_id']}&size=10&page={meta['page']}&b_type_new=0&device_id=0&is_outside=1"
-            yield res.follow(url, meta=meta)
+    # def parse(self, res):
+    #     r = res.json()["data"]["list"]
+    #     print(res.json())
+    #     meta = res.meta
+    #     if r:
+    #         yield res.json()
+    #         meta["page"] += 1
+    #         url = f"https://ec.snssdk.com/shop/goodsList?shop_id={meta['shop_id']}&size=10&page={meta['page']}&b_type_new=0&device_id=0&is_outside=1"
+    #         yield res.follow(url, meta=meta)
 
 
 ExampleSpider.start()
