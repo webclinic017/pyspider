@@ -53,9 +53,16 @@ mysql_test = {
 }
 
 kafka_test = {
-    "bootstrap_servers": ["kafka01:9092", " kafka02:9092", "kafka03:9092"],
-    "value_serializer": lambda m: json.dumps(m).encode("utf8"),
-    "key_serializer": str.encode,
+    "producer": {
+        "bootstrap_servers": ["kafka01:9092", " kafka02:9092", "kafka03:9092"],
+        "value_serializer": lambda m: json.dumps(m).encode("utf8"),
+        "key_serializer": str.encode,
+    },
+    "consumer": {
+        "bootstrap_servers": ["kafka01:9092", " kafka02:9092", "kafka03:9092"],
+        "value_deserializer": lambda m: json.loads(m.decode("utf8")),
+        "key_deserializer": bytes.decode,
+    },
 }
 
 REDIS_CONF = {

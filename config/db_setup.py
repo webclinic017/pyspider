@@ -172,8 +172,8 @@ class AioMysql:
 class KafkaClient:
     def __init__(self, env="test", logger=None) -> None:
         self.env = env
-        self.producer = kafka.KafkaProducer(**KAFKA_CONF[self.env])
-        self.consumer = kafka.KafkaConsumer(**KAFKA_CONF[self.env])
+        self.producer = kafka.KafkaProducer(**KAFKA_CONF[self.env]["producer"])
+        self.consumer = kafka.KafkaConsumer(**KAFKA_CONF[self.env]["consumer"])
         self.logger = logger or logging.getLogger(__name__)
 
     def produce(self, topic, value, key=None):
