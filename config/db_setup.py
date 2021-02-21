@@ -174,10 +174,7 @@ class KafkaClient:
         self.env = env
         self.producer = kafka.KafkaProducer(**KAFKA_CONF[self.env])
         self.consumer = kafka.KafkaConsumer(**KAFKA_CONF[self.env])
-        if not logger:
-            self.logger = logging.getLogger(__name__)
-        else:
-            self.logger = logger
+        self.logger = logger or logging.getLogger(__name__)
 
     def produce(self, topic, value, key=None):
         self.producer.send(topic, value, key=key).add_callback(
