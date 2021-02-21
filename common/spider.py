@@ -170,7 +170,7 @@ class AsyncSpider(Settings):
             # await self.run_in_executor(self.process_item, callback_result)
             await self.process_item(callback_result)
 
-    def parse(self, response):
+    async def parse(self, response):
         """
         解析response
         """
