@@ -262,18 +262,17 @@ class AsyncSpider(Settings):
             self.redis_client = await self.aioredis_client.setup()
         try:
             await self.run()
+        except Exception as e:
+            self.logger.error(e)
         finally:
             await self.close()
-            # Display logs about this crawl task
-            end_time = datetime.now()
-            self.logger.info(
-                f"Total requests: {self.failed_counts + self.success_counts}"
-            )
-
-            if self.failed_counts:
-                self.logger.info(f"Failed requests: {self.failed_counts}")
-            self.logger.info(f"Time usage: {end_time - start_time}")
-            self.logger.info("Spider finished!")
+        # Display logs about this crawl task
+        end_time = datetime.now()
+        self.logger.info(f"Total requests: {self.failed_counts + self.success_counts}")
+        if self.failed_counts:
+            self.logger.info(f"Failed requests: {self.failed_counts}")
+        self.logger.info(f"Time usage: {end_time - start_time}")
+        self.logger.info("Spider finished!")
 
     @classmethod
     def start(cls, loop=None, close_event_loop=True):
