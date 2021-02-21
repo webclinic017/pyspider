@@ -198,7 +198,7 @@ class KafkaClient:
         )
 
     def on_send_error(self, exc):
-        self.logger.error("I am an errback", exc_info=exc)
+        self.logger.error("Message delivered failed", exc_info=exc)
 
 
 async def conn_aiomysql():

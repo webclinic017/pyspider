@@ -1,7 +1,7 @@
 import sys
 import os
 
-sys.path.append(os.getcwd())
+sys.path.append(os.path.abspath(".."))
 from common.spider import AsyncSpider
 from utils.log import get_logger
 
@@ -12,6 +12,8 @@ class ExampleSpider(AsyncSpider):
     retry_time = 3
     key = "test"
     redis_env = "aio_test"
+    topic = "test_kafka"
+    kafka_env = "test"
     logger = get_logger("example_spider")
 
     @staticmethod
@@ -59,9 +61,9 @@ class ExampleSpider(AsyncSpider):
     def parse(self, res):
         r = res.json()["data"]["list"]
         print(res.json())
-        yield res.json()
         meta = res.meta
         if r:
+            yield res.json()
             meta["page"] += 1
             url = f"https://ec.snssdk.com/shop/goodsList?shop_id={meta['shop_id']}&size=10&page={meta['page']}&b_type_new=0&device_id=0&is_outside=1"
             yield res.follow(url, meta=meta)
