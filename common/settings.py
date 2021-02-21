@@ -11,7 +11,7 @@ class Settings:
     # 消费者数量
     worker_numbers = 4
     timeout = 5
-    logger = loguru.logger
+    logger_name = "common"
     redis_env = ""
     redis_db = 0
     key = None

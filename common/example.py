@@ -3,7 +3,6 @@ import os
 
 sys.path.append(os.path.abspath(".."))
 from common.spider import AsyncSpider
-from utils.log import get_logger
 
 
 class ExampleSpider(AsyncSpider):
@@ -12,9 +11,9 @@ class ExampleSpider(AsyncSpider):
     retry_time = 3
     key = "test"
     redis_env = ""
-    topic = "test_kafka"
-    kafka_env = "test"
-    logger = get_logger("example_spider")
+    # topic = "test_kafka"
+    # kafka_env = "test"
+    logger_name = "example_spider"
 
     @staticmethod
     def make_headers():
