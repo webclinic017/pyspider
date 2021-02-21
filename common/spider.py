@@ -178,7 +178,7 @@ class AsyncSpider(Settings):
         """
         保存数据操作
         """
-        if self.key:
+        if self.key and self.redis_client:
             if isinstance(self.redis_client, RedisClient):
                 self.redis_client.lpush(
                     self.key,
