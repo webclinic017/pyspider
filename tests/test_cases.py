@@ -9,17 +9,12 @@ from common.spider import AsyncSpider
 from config.db_setup import RedisClient, MysqlClient, AioRedis, AioMysql
 
 
-async def fetch_page():
+@pytest.mark.asyncio
+async def test_fetch_page():
     async with AsyncSpider() as spider:
         data = await spider.request("https://python.org")
         if data:
-            return data[1].text
-
-
-def test_async_spider():
-    res = asyncio.run(fetch_page())
-    # print(res)
-    assert "python" in res
+            assert "python" in data[0]
 
 
 def test_redis_client():
@@ -63,4 +58,4 @@ def test_aiomysql():
 
 
 if __name__ == "__main__":
-    test_async_spider()
+    pass
