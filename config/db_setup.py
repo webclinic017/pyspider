@@ -17,21 +17,6 @@ class RedisClient(redis.Redis):
     def __init__(self, env="test", db=0) -> None:
         self.pool = redis.ConnectionPool(db=db, **REDIS_CONF[env])
         super().__init__(connection_pool=self.pool)
-        # self.db = self.setup_redis(env=env)
-
-    @staticmethod
-    def _setup_redis(**kwargs):
-        """连接redis"""
-        try:
-            pool = redis.ConnectionPool(**kwargs)
-            client = redis.Redis(connection_pool=pool)
-        except Exception as e:
-            raise e
-        else:
-            return client
-
-    def setup_redis(self, env="test"):
-        return self._setup_redis(**REDIS_CONF[env])
 
     def set_cache(self, name, key, value, cache_cycle=7, refresh=False):
         """
