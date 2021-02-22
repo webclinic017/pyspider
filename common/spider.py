@@ -202,8 +202,9 @@ class AsyncSpider(Settings):
             #     return
             if isinstance(request_item, Awaitable):
                 if not is_gather:
-                    result, res = await request_item
-                    await self.process_callback(result, res)
+                    data = await request_item
+                    if data:
+                        await self.process_callback(*data)
                 else:
                     worker_tasks.append(request_item)
                     if self.request_queue.empty():
