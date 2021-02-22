@@ -1,12 +1,12 @@
 import asyncio
-import sys
 import os
+import sys
 
 import pytest
 
 sys.path.append(os.pardir)
 from common.spider import AsyncSpider
-from config.db_setup import RedisClient, MysqlClient, AioRedis, AioMysql
+from config.db_setup import AioMysql, AioRedis, MysqlClient, RedisClient
 
 pytestmark = pytest.mark.asyncio
 
