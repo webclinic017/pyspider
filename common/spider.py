@@ -16,7 +16,7 @@ from config import AioRedis, KafkaClient, RedisClient
 from utils.log import get_loguru_logger
 
 from common.request import aiorequest
-from common.response import RequestBody
+from common.response import RequestBody, Response
 from common.settings import Settings
 
 # from utils.tools import LazyProperty
@@ -170,7 +170,7 @@ class AsyncSpider(Settings):
             # await self.run_in_executor(self.process_item, callback_result)
             await self.process_item(callback_result)
 
-    async def parse(self, response):
+    async def parse(self, response: Response):
         """
         解析response
         """
