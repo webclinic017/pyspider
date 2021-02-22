@@ -1,5 +1,4 @@
 import itertools
-import json
 import sys
 import time
 from urllib.parse import quote
