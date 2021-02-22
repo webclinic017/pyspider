@@ -3,8 +3,10 @@ import sys
 
 import aiohttp
 import async_timeout
-from aiohttp import ClientSession, TCPConnector
 import loguru
+import ujson
+from aiohttp import ClientSession, TCPConnector
+
 from .response import Response
 
 if sys.platform == "win32":
@@ -47,7 +49,10 @@ class Request:
         self.callback = callback
         self.headers = headers
         self.params = params
-        self.data = data
+        if isinstance(data, dict):
+            self.data = ujson.dumps(data)
+        else:
+            self.data = data
         self.proxy = proxy
 
     async def fetch(self):
