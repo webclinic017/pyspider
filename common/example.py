@@ -10,7 +10,7 @@ class ExampleSpider(AsyncSpider):
     concurrency = 16
     retry_time = 3
     key = "test"
-    redis_env = "test"
+    redis_env = "aio_test"
     # topic = "test_kafka"
     # kafka_env = "test"
     logger_name = "example_spider"
