@@ -12,13 +12,13 @@ sys.path.append(path)
 from common.spider import AsyncSpider
 from service.pdd_risk import PddParamsProducer
 from spiders.pdd.activity.crawl_cate import get_cat_info
-from utils.log import get_logger
 
 
 class CrawlFindGoods(AsyncSpider):
     key = "pdd_activity_find_goods"
     redis_env = "redis15"
-    logger = get_logger("activity_find_goods")
+    redis_db = 1
+    logger_name = "activity_find_goods"
 
     @staticmethod
     def make_body(cate_info, anti_content, page):
@@ -63,7 +63,7 @@ class CrawlFindGoods(AsyncSpider):
                 url,
                 method="POST",
                 headers=headers,
-                data=json.dumps(body),
+                data=body,
                 callback=self.parse,
             )
 
