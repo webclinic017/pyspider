@@ -26,4 +26,5 @@ class Settings:
         "Accept-Language": "zh-CN,zh;q=0.9",
         "Connection": " keep-alive",
         "Accept-Encoding": "gzip, deflate, br",
+        "accept": "application/json, text/plain, */*",
     }
