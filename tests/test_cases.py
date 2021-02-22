@@ -8,9 +8,10 @@ sys.path.append(os.pardir)
 from common.spider import AsyncSpider
 from config.db_setup import RedisClient, MysqlClient, AioRedis, AioMysql
 
+pytestmark = pytest.mark.asyncio
 
-@pytest.mark.asyncio
-async def test_fetch_page():
+
+async def test_asyncSpider():
     async with AsyncSpider() as spider:
         data = await spider.request("https://python.org")
         if data:
@@ -34,15 +35,11 @@ def test_mysql_client():
     assert r is True
 
 
-async def conn_aioredis():
+async def test_aioredis():
     async with AioRedis() as redis_client:
         await redis_client.set("my_key", "value")
-        return await redis_client.get("my_key")
-
-
-def test_aioredis():
-    r = asyncio.run(conn_aioredis())
-    assert r == "value"
+        data = await redis_client.get("my_key")
+        assert data == "value"
 
 
 async def conn_aiomysql():
@@ -54,7 +51,7 @@ async def conn_aiomysql():
 
 def test_aiomysql():
     r = asyncio.run(conn_aiomysql())
-    assert r == True
+    assert r is True
 
 
 if __name__ == "__main__":
