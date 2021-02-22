@@ -1,9 +1,11 @@
 from typing import Optional
 
 from fastapi import FastAPI
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import Response
+from api import jingxi
 
-app = FastAPI(on_startup=[])
+app = FastAPI()
+app.include_router(jingxi.router)
 
 
 @app.get("/")
