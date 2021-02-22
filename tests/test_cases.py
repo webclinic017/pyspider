@@ -15,7 +15,7 @@ async def test_asyncSpider():
     async with AsyncSpider() as spider:
         data = await spider.request("https://python.org")
         if data:
-            assert "python" in data[0]
+            assert "python" in data.text
 
 
 def test_redis_client():

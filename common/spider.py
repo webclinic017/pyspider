@@ -96,6 +96,16 @@ class AsyncSpider(Settings):
             if proxy:
                 return "http://" + proxy
 
+    @staticmethod
+    async def fetch_callback(callback, res):
+        if not callable(callback):
+            raise TypeError("callback must be callable!")
+        elif iscoroutinefunction(callback):
+            result = await callback(res)
+        else:
+            result = callback(res)
+        return result
+
     async def request(
         self,
         url,
@@ -135,19 +145,15 @@ class AsyncSpider(Settings):
                         self.failed_counts += 1
                     else:
                         self.success_counts += 1
-                        if callback is None:
-                            callback = self.parse
-                        elif not callable(callback):
-                            raise TypeError("callback must be callable!")
-                        if iscoroutinefunction(callback):
-                            result = await callback(res)
+                        if callback:
+                            result = await self.fetch_callback(callback, res)
+                            return result
                         else:
-                            result = callback(res)
-                        return result, res
+                            return res
             else:
                 self.logger.error("can't get proxy!")
 
-    async def process_callback(self, callback_results, response=None):
+    async def process_callback(self, callback_results):
         try:
             if isasyncgen(callback_results):
                 async for callback_result in callback_results:
@@ -165,7 +171,7 @@ class AsyncSpider(Settings):
             await self.process_callback(callback_result)
         elif isinstance(callback_result, RequestBody):
             self.request_queue.put_nowait(self.create_task(callback_result))
-        elif isinstance(callback_result, (dict, str)):
+        elif isinstance(callback_result, (dict, str, Response)):
             # Process target item
             # await self.run_in_executor(self.process_item, callback_result)
             await self.process_item(callback_result)
@@ -182,6 +188,12 @@ class AsyncSpider(Settings):
         """
         if isinstance(result, dict):
             data = ujson.dumps(result, ensure_ascii=False)
+        elif isinstance(result, Response):
+            try:
+                data = result.json()
+            except Exception:
+                self.logger.warning("response is not a json str!")
+                data = result.text
         else:
             data = result
         if self.key and self.redis_client:
@@ -215,8 +227,7 @@ class AsyncSpider(Settings):
                         worker_tasks.clear()
                         for result in results:
                             if not isinstance(result, RuntimeError) and result:
-                                callback_results, response = result
-                                await self.process_callback(callback_results, response)
+                                await self.process_callback(result)
             else:
                 if isinstance(request_item, (dict, str)):
                     await self.run_in_executor(self.process_item, request_item)
