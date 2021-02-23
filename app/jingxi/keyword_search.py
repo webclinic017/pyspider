@@ -1,5 +1,5 @@
-from common.spider import AsyncSpider
 import ujson
+from common.spider import AsyncSpider
 
 
 class KeywordSearch(AsyncSpider):

@@ -1,6 +1,6 @@
+from app.jingxi.keyword_search import KeywordSearch
 from fastapi import APIRouter
 from fastapi.responses import ORJSONResponse
-from app.jingxi.keyword_search import KeywordSearch
 
 router = APIRouter(prefix="/jingxi", tags=["jingxi"])
 
