@@ -1,22 +1,19 @@
 import ujson
 from app.jingxi.keyword_search import KeywordSearch
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from schemas.response import CommonResponse
-from config import AioRedis
+from api.deps import get_redis
 
-redis_instance = AioRedis()
 
 router = APIRouter(prefix="/jingxi", tags=["jingxi"])
 
 
 @router.get("/keywordSearch", response_model=CommonResponse)
-async def keyword_search(keyword: str, page: int = 1):
+async def keyword_search(keyword: str, page: int = 1, redis_client=Depends(get_redis)):
     cache_key = f"{keyword}-{page}"
-    redis_client = await redis_instance.setup()
     data = await redis_client.hget("jingxi_keyword_search_cache", cache_key)
-    content = None
     if data:
-        content = ujson.loads(data)
+        return ujson.loads(data)
     else:
         async with KeywordSearch() as KS:
             res = await KS.request(keyword, page)
@@ -25,5 +22,4 @@ async def keyword_search(keyword: str, page: int = 1):
             await redis_client.hset(
                 "jingxi_keyword_search_cache", cache_key, content.json()
             )
-    await redis_instance.close()
-    return content
+            return content
