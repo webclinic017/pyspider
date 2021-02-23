@@ -1,6 +1,6 @@
 from app.jingxi.keyword_search import KeywordSearch
 from fastapi import APIRouter
-from api.common import CommonResponse
+from schemas.response import CommonResponse
 
 router = APIRouter(prefix="/jingxi", tags=["jingxi"])
 
