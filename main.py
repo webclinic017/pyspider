@@ -1,7 +1,6 @@
 from typing import Optional
 
 from fastapi import FastAPI
-from fastapi.responses import Response
 import api
 
 app = FastAPI()
