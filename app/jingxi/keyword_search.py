@@ -1,7 +1,6 @@
 import ujson
 from common.spider import AsyncSpider
 
-
 class KeywordSearch(AsyncSpider):
     retry_time = 0
 
