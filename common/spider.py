@@ -119,6 +119,7 @@ class AsyncSpider(Settings):
     ):
         if not headers:
             headers = self.default_headers
+        if "User-Agent" or "user-agent" not in headers:
             ua = await self.get_ua(ua_type=self.ua_type)
             headers["User-Agent"] = ua
         if self.retry_time <= 0:

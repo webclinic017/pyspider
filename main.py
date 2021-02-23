@@ -2,10 +2,10 @@ from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.responses import Response
-from api import jingxi
+import api
 
 app = FastAPI()
-app.include_router(jingxi.router)
+app.include_router(api.router)
 
 
 @app.get("/")
