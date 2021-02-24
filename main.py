@@ -2,8 +2,11 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi.responses import PlainTextResponse, JSONResponse
 from app import api
+from app.events import setup_db, shutdown_db
 
 app = FastAPI()
+app.add_event_handler("startup", setup_db(app))
+app.add_event_handler("shutdown", shutdown_db())
 app.include_router(api.router)
 
 
