@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 
-import api
+from app import api
 
 app = FastAPI()
 app.include_router(api.router)
