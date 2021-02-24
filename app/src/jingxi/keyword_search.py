@@ -23,7 +23,7 @@ class KeywordSearch(AsyncSpider):
             "body": ujson.dumps(
                 {
                     "isCorrect": "1",
-                    "pvid": "898c77b3698057b0511d91831d908148_1613996835339",
+                    # "pvid": "898c77b3698057b0511d91831d908148_1613996835339",
                     "sort": "0",
                     "stock": "1",
                     "keyword": keyword,
@@ -34,7 +34,9 @@ class KeywordSearch(AsyncSpider):
                 }
             ),
             "g_ty": "ajax",
-            "sceneval": 1,
+            "sceneval": 2,
+            "client": "android",
+            "screen": "1438.5*2880.5",
         }
         headers = self.make_headers(keyword)
         return await super().request(
