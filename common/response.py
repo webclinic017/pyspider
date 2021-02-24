@@ -1,5 +1,6 @@
 from typing import Any, NamedTuple
 import ujson
+from bs4 import BeautifulSoup
 
 
 class RequestBody(NamedTuple):
@@ -42,3 +43,10 @@ class Response:
         return RequestBody(
             url, method=method, headers=headers, callback=callback, meta=meta
         )
+
+    def html_tree(self):
+        """
+        Return etree HTML
+        """
+        bs = BeautifulSoup(self.text, "lxml")
+        return bs
