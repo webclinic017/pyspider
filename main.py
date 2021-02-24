@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 import api
-import asyncio
 from config import AioRedis
 
 r = AioRedis()
