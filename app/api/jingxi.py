@@ -1,10 +1,9 @@
 import ujson
-from app.src.jingxi.keyword_search import KeywordSearch
-from fastapi import APIRouter, Depends
-from schemas.response import CommonResponse
 from aioredis import Redis
 from app.deps import get_redis
-
+from app.schemas.response import CommonResponse
+from app.src.jingxi.keyword_search import KeywordSearch
+from fastapi import APIRouter, Depends
 
 router = APIRouter(prefix="/jingxi", tags=["jingxi"])
 
