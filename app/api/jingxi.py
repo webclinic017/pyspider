@@ -1,9 +1,9 @@
 import ujson
 from aioredis import Redis
-from app.deps import get_redis
-from app.schemas.response import CommonResponse
+from app.deps import DBDepend
+from app.schemas.response import CommonResponse, EmptyResponse
 from app.src.jingxi.keyword_search import KeywordSearch
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/jingxi", tags=["jingxi"])
 
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/jingxi", tags=["jingxi"])
 async def keyword_search(
     keyword: str,
     page: int = 1,
-    cache: Redis = Depends(get_redis),
+    cache: Redis = DBDepend.redis_local,
 ):
     cache_key = f"{keyword}-{page}"
     data = await cache.hget("jingxi_keyword_search_cache", cache_key)
@@ -25,3 +25,4 @@ async def keyword_search(
             content = CommonResponse(data=res.json())
             await cache.hset("jingxi_keyword_search_cache", cache_key, content.json())
             return content
+        return EmptyResponse()

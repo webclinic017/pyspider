@@ -17,6 +17,6 @@ class CacheResponse(BaseModel):
 
 
 class EmptyResponse(BaseModel):
-    data: Any = None
+    data: Any = ""
     code: int = 401
     msg: str = "false"
