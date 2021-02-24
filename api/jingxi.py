@@ -13,10 +13,10 @@ router = APIRouter(prefix="/jingxi", tags=["jingxi"])
 async def keyword_search(
     keyword: str,
     page: int = 1,
-    redis_client: Redis = Depends(get_redis),
+    cache: Redis = Depends(get_redis),
 ):
     cache_key = f"{keyword}-{page}"
-    data = await redis_client.hget("jingxi_keyword_search_cache", cache_key)
+    data = await cache.hget("jingxi_keyword_search_cache", cache_key)
     if data:
         return ujson.loads(data)
     else:
@@ -24,7 +24,5 @@ async def keyword_search(
             res = await KS.request(keyword, page)
         if res:
             content = CommonResponse(data=res.json())
-            await redis_client.hset(
-                "jingxi_keyword_search_cache", cache_key, content.json()
-            )
+            await cache.hset("jingxi_keyword_search_cache", cache_key, content.json())
             return content
