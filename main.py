@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import PlainTextResponse
-
+from fastapi.exceptions import RequestValidationError, HTTPException
+from fastapi.responses import PlainTextResponse, JSONResponse
 from app import api
 
 app = FastAPI()
@@ -16,3 +15,8 @@ async def read_root():
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
     return PlainTextResponse(str(exc), status_code=400)
+
+
+@app.exception_handler(HTTPException)
+async def http_error_handler(request, exc: HTTPException):
+    return JSONResponse({"errors": [exc.detail]}, status_code=exc.status_code)
