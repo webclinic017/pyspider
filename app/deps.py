@@ -21,10 +21,10 @@ def get_redis30(request: Request):
 
 
 class DBDepend:
-    redis_local = Depends(get_redis_local)
     if env == "test":
-        redis15 = Depends(get_redis_local)
-        redis30 = redis15
+        redis_local = Depends(get_redis_local)
+        redis15 = redis_local
+        redis30 = redis_local
     else:
         redis15 = Depends(get_redis15)
         redis30 = Depends(get_redis30)
