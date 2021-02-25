@@ -5,15 +5,15 @@ from app import api
 from app.events import setup_db, shutdown_db
 
 
-def create_app():
+def create_app(env="test"):
     app = FastAPI()
-    app.add_event_handler("startup", setup_db(app))
-    app.add_event_handler("shutdown", shutdown_db())
+    app.add_event_handler("startup", setup_db(app, env=env))
+    app.add_event_handler("shutdown", shutdown_db(env=env))
     app.include_router(api.router)
     return app
 
 
-app = create_app()
+app = create_app(env="test")
 
 
 @app.get("/")
