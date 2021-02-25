@@ -77,6 +77,7 @@ class MysqlClient:
         # sql = "INSERT INTO birds (name,description) VALUES ('alix minor','wood duck')"
         try:
             self.cursor.execute(sql)
+            return True
         except pymysql.err.OperationalError as e:
             logging.error(e)
             self.conn.rollback()

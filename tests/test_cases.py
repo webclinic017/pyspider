@@ -25,8 +25,8 @@ def test_redis_client():
 
 def test_mysql_client():
     mysql_client = MysqlClient()
-    sql = "CREATE TABLE if not exists mytest (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
-    r = mysql_client.create_table(sql)
+    sql = "INSERT INTO birds (name,description) VALUES ('alix minor','wood duck')"
+    r = mysql_client.insert_data(sql)
     mysql_client.close()
     assert r is True
 
