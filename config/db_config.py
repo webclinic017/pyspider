@@ -50,6 +50,7 @@ mysql_test = {
     "user": "wangxin",
     "password": "965213",
     "db": "mysql",
+    "autocommit": True,
 }
 
 kafka_test = {

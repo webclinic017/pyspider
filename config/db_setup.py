@@ -155,11 +155,11 @@ class AioMysql:
     async def close(self):
         if self.cursor:
             await self.cursor.close()
-        # if self.conn:
-        #     await self.conn.close()
+        if self.conn:
+            self.conn.close()
         if self.pool:
             self.pool.close()
-            await self.pool.wait_closed()
+            # await self.pool.wait_closed()
 
     async def __aenter__(self):
         await self.setup()
@@ -203,18 +203,3 @@ class KafkaClient:
     def close(self):
         self.producer.close()
         self.consumer.close()
-
-
-async def conn_aiomysql():
-    sql = "CREATE TABLE if not exists test_mysql (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
-    async with AioMysql() as mysql_client:
-        r = await mysql_client.create_table(sql)
-    print(r)
-
-
-if __name__ == "__main__":
-    # _r = RedisClient().get('test')
-    # print(_r)
-    # r = asyncio.run(AioRedis().setup())
-    # m = asyncio.run(AioMysql().setup())
-    asyncio.run(conn_aiomysql())
