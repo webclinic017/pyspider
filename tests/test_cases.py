@@ -45,7 +45,6 @@ async def test_conn_aiomysql():
     sql = "CREATE TABLE if not exists fastapi (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
     async with AioMysql() as mysql_client:
         r = await mysql_client.create_table(sql)
-        print(r)
         assert r is True
 
 
