@@ -1,10 +1,9 @@
-import asyncio
 import os
 import sys
 
 import pytest
 
-sys.path.append(os.pardir)
+# sys.path.append(os.pardir)
 from common.spider import AsyncSpider
 from config.db_setup import AioMysql, AioRedis, MysqlClient, RedisClient
 
@@ -42,16 +41,12 @@ async def test_aioredis():
         assert data == "value"
 
 
-async def conn_aiomysql():
-    sql = "CREATE TABLE if not exists pytest (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
+async def test_conn_aiomysql():
+    sql = "CREATE TABLE if not exists fastapi (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
     async with AioMysql() as mysql_client:
         r = await mysql_client.create_table(sql)
-    return r
-
-
-def test_aiomysql():
-    r = asyncio.run(conn_aiomysql())
-    assert r is True
+        print(r)
+        assert r is True
 
 
 if __name__ == "__main__":
