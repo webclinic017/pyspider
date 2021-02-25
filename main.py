@@ -12,6 +12,7 @@ def create_app(env="test"):
     else:
         debug = False
     app = FastAPI(debug=debug)
+
     app.add_event_handler("startup", setup_db(app, env=env))
     app.add_event_handler("shutdown", shutdown_db(app))
 
