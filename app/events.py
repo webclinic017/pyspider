@@ -13,6 +13,8 @@ def setup_db(app: FastAPI, env="test"):
         app.state.env = env
         if env == "test":
             app.state.redis = await r.setup()
+            app.state.redis15 = app.state.redis
+            app.state.redis30 = app.state.redis
         elif env == "prod":
             app.state.redis15 = await redis15.setup()
             app.state.redis30 = await redis30.setup()

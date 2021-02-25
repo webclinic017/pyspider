@@ -12,7 +12,7 @@ router = APIRouter(prefix="/jingxi", tags=["jingxi"])
 async def keyword_search(
     keyword: str,
     page: int = 1,
-    cache: Redis = DBDepend.redis_local,
+    cache: Redis = DBDepend.redis30,
 ):
     cache_key = f"{keyword}-{page}"
     data = await cache.hget("jingxi_keyword_search_cache", cache_key)

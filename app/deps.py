@@ -1,6 +1,10 @@
 from fastapi import Depends, Request
 
 
+def get_env(request: Request):
+    return request.app.state.env
+
+
 def get_redis_local(request: Request):
     return request.app.state.redis
 
@@ -14,6 +18,11 @@ def get_redis30(request: Request):
 
 
 class DBDepend:
+    env = Depends(get_env)
     redis_local = Depends(get_redis_local)
-    redis15 = Depends(get_redis15)
-    redis30 = Depends(get_redis30)
+    if env == "test":
+        redis15 = Depends(get_redis_local)
+        redis30 = redis15
+    else:
+        redis15 = Depends(get_redis15)
+        redis30 = Depends(get_redis30)
