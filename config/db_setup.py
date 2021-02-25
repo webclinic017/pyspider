@@ -200,6 +200,10 @@ class KafkaClient:
     def on_send_error(self, exc):
         self.logger.error("Message delivered failed", exc_info=exc)
 
+    def close(self):
+        self.producer.close()
+        self.consumer.close()
+
 
 async def conn_aiomysql():
     sql = "CREATE TABLE if not exists test_mysql (id INT AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),description TEXT)"
