@@ -1,7 +1,6 @@
-from loguru import logger
 from config import AioRedis
 from fastapi import FastAPI
-
+from loguru import logger
 
 r = AioRedis()
 redis15 = AioRedis("aio_redis15")
