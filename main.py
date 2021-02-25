@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError, HTTPException
-from fastapi.responses import PlainTextResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from app import api
 from app.events import setup_db, shutdown_db
 
@@ -22,8 +22,8 @@ async def read_root():
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    return PlainTextResponse(str(exc), status_code=400)
+async def validation_exception_handler(request, exc: RequestValidationError):
+    return JSONResponse({"errors": [exc.errors]}, status_code=400)
 
 
 @app.exception_handler(HTTPException)

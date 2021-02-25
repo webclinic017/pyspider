@@ -8,7 +8,7 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/jingxi", tags=["jingxi"])
 
 
-@router.get("/keywordSearch", response_model=CommonResponse)
+@router.get("/keywordSearch", response_model=CommonResponse, name="关键词搜索")
 async def keyword_search(
     keyword: str,
     page: int = 1,
