@@ -10,6 +10,7 @@ redis30 = AioRedis("aio_redis30")
 
 def setup_db(app: FastAPI, env="test"):
     async def connect_redis():
+        app.state.env = env
         if env == "test":
             app.state.redis = await r.setup()
         elif env == "prod":
@@ -20,8 +21,9 @@ def setup_db(app: FastAPI, env="test"):
     return connect_redis
 
 
-def shutdown_db(env="test"):
+def shutdown_db(app: FastAPI):
     async def stop_redis():
+        env = app.state.env
         if env == "test":
             await r.close()
         elif env == "prod":
