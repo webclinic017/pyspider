@@ -1,6 +1,3 @@
-import os
-import sys
-
 import pytest
 
 # sys.path.append(os.pardir)
