@@ -5,6 +5,9 @@ def get_env(request: Request):
     return request.app.state.env
 
 
+env = Depends(get_env)
+
+
 def get_redis_local(request: Request):
     return request.app.state.redis
 
@@ -18,7 +21,6 @@ def get_redis30(request: Request):
 
 
 class DBDepend:
-    env = Depends(get_env)
     redis_local = Depends(get_redis_local)
     if env == "test":
         redis15 = Depends(get_redis_local)
