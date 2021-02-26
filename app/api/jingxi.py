@@ -14,14 +14,15 @@ async def keyword_search(
     keyword: str,
     page: int = 1,
     cache: Redis = DBDepend.redis30,
+    session=session,
 ):
     cache_key = f"{keyword}-{page}"
     data = await cache.hget(JingXi.KEYWORD_SEARCH_CACHE_HASH, cache_key)
     if data:
         return ujson.loads(data)
     else:
-        async with KeywordSearch(session) as KS:
-            res = await KS.request(keyword, page)
+        KS = KeywordSearch(session)
+        res = await KS.request(keyword, page)
         if res:
             content = CommonResponse(data=res.json())
             await cache.hset(
