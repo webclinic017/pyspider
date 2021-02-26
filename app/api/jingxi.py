@@ -1,7 +1,7 @@
 import ujson
 from aioredis import Redis
 from app.constants import JingXi
-from app.deps import DBDepend
+from app.deps import DBDepend, session
 from app.schemas.response import CommonResponse, EmptyResponse
 from app.src.jingxi.keyword_search import KeywordSearch
 from fastapi import APIRouter
@@ -20,7 +20,7 @@ async def keyword_search(
     if data:
         return ujson.loads(data)
     else:
-        async with KeywordSearch() as KS:
+        async with KeywordSearch(session) as KS:
             res = await KS.request(keyword, page)
         if res:
             content = CommonResponse(data=res.json())
