@@ -12,9 +12,6 @@ def get_client_session(request: Request):
     return request.app.state.session
 
 
-session = Depends(get_client_session)
-
-
 def get_redis_local(request: Request):
     return request.app.state.redis
 
@@ -27,10 +24,12 @@ def get_redis30(request: Request):
     return request.app.state.redis30
 
 
-class DBDepend:
+class Depend:
     """
-    全局数据库依赖
+    全局依赖项
     """
+
+    session = Depends(get_client_session)
 
     if env == "test":
         redis_local = Depends(get_redis_local)
