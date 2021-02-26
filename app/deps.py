@@ -21,6 +21,10 @@ def get_redis30(request: Request):
 
 
 class DBDepend:
+    """
+    全局数据库依赖
+    """
+
     if env == "test":
         redis_local = Depends(get_redis_local)
         redis15 = redis_local
