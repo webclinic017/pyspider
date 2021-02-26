@@ -1,5 +1,4 @@
 import random
-from aiohttp import ClientSession, TCPConnector
 
 
 class Settings:
@@ -12,7 +11,6 @@ class Settings:
     worker_numbers = 4
     timeout = 5
     logger_name = "common"
-    session = ClientSession(connector=TCPConnector(ssl=False))
     redis_env = ""
     redis_db = 0
     key = None

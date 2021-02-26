@@ -7,10 +7,9 @@ from inspect import isasyncgen, iscoroutinefunction, isgenerator
 from types import AsyncGeneratorType
 from typing import Awaitable
 
-import aiohttp
 import async_timeout
 import ujson
-from aiohttp import ClientSession
+from aiohttp import ClientSession, TCPConnector
 from aioredis import Redis
 from config import AioRedis, KafkaClient, RedisClient
 from utils.log import get_loguru_logger
@@ -35,7 +34,8 @@ else:
 class AsyncSpider(Settings):
     """异步爬虫，支持异步上下文管理器"""
 
-    def __init__(self) -> None:
+    def __init__(self, session=None) -> None:
+        self.session = session or ClientSession(connector=TCPConnector(ssl=False))
         self.sem = asyncio.Semaphore(self.concurrency)
         self.request_queue = asyncio.Queue()
         self.executor = ThreadPoolExecutor()

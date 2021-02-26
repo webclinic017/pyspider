@@ -8,6 +8,13 @@ def get_env(request: Request):
 env = Depends(get_env)
 
 
+def get_client_session(request: Request):
+    return request.app.state.session
+
+
+session = Depends(get_client_session)
+
+
 def get_redis_local(request: Request):
     return request.app.state.redis
 
