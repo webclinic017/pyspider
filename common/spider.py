@@ -36,7 +36,6 @@ class AsyncSpider(Settings):
     """异步爬虫，支持异步上下文管理器"""
 
     def __init__(self) -> None:
-        self.session = ClientSession(connector=aiohttp.TCPConnector(ssl=False))
         self.sem = asyncio.Semaphore(self.concurrency)
         self.request_queue = asyncio.Queue()
         self.executor = ThreadPoolExecutor()
