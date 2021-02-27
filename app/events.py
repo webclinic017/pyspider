@@ -1,7 +1,7 @@
+from aiohttp import ClientSession, TCPConnector
 from config import AioRedis
 from fastapi import FastAPI
 from loguru import logger
-from aiohttp import ClientSession, TCPConnector
 
 r = AioRedis()
 redis15 = AioRedis("aio_redis15")
