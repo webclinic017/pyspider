@@ -1,4 +1,5 @@
 from typing import Any, NamedTuple
+
 import ujson
 from bs4 import BeautifulSoup
 
