@@ -32,7 +32,7 @@ else:
 
 
 class AsyncSpider(Settings):
-    """异步爬虫，支持异步上下文管理器"""
+    """异步通用爬虫"""
 
     def __init__(self, session=None) -> None:
         self.session = session or ClientSession(connector=TCPConnector(ssl=False))
