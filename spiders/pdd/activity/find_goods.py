@@ -70,8 +70,8 @@ class CrawlFindGoods(AsyncSpider):
         res = response.json()
         try:
             data = res["result"]["data"]
-        except:
-            pass
+        except KeyError as e:
+            self.logger.error(f"{repr(e)},res:{res}")
         else:
             if data:
                 if not res.get("errorMsg"):
