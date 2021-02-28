@@ -8,6 +8,7 @@ import aioredis
 import kafka
 import pymysql
 import redis
+from rediscluster import RedisCluster
 
 from config.db_config import KAFKA_CONF, MYSQL_CONF, REDIS_CONF
 
@@ -49,6 +50,11 @@ class RedisClient(redis.Redis):
         p.ltrim(key, n, -1)
         data = p.execute()
         return data
+
+
+class TendisClient(RedisCluster):
+    def __init__(self):
+        super().__init__(**REDIS_CONF["tendis"])
 
 
 class MysqlClient:

@@ -14,7 +14,7 @@ from utils.tools import gen_random_str
 
 
 class CrawlFindGoods(AsyncSpider):
-    # key = "pdd_activity_find_goods"
+    key = "pdd_spike_activate_goods_list"
     # redis_env = "redis15"
     # redis_db = 1
     logger_name = "activity_sec_kill"

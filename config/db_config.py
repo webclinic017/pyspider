@@ -24,6 +24,16 @@ redis_30 = {
     "decode_responses": True,
 }
 
+tendis = {
+    "startup_nodes": [
+        {"host": "172.16.0.71", "port": 50001},
+        {"host": "172.16.0.71", "port": 50002},
+        {"host": "172.16.0.131", "port": 50003},
+    ],
+    "password": "20A3NBVJnWZtNzxumYOz",
+    "decode_responses": True,
+}
+
 aioredis_test = {
     "address": ("localhost", 6379),
     "password": None,
@@ -73,6 +83,7 @@ REDIS_CONF = {
     "aio_test": aioredis_test,
     "aio_redis15": aioredis_15,
     "aio_redis30": aioredis_30,
+    "tendis": tendis,
 }
 
 MYSQL_CONF = {"test": mysql_test}
