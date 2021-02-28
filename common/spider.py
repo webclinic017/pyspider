@@ -300,6 +300,14 @@ class AsyncSpider(Settings):
             loop.close()
         return spider
 
+    @classmethod
+    async def async_start(cls, loop=None):
+        loop = loop or asyncio.get_event_loop()
+        spider_ins = cls()
+        await spider_ins._start()
+
+        return spider_ins
+
     @staticmethod
     async def cancel_all_tasks():
         """
