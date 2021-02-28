@@ -1,6 +1,5 @@
 import itertools
 import sys
-import time
 from urllib.parse import quote
 
 if sys.platform == "win32":
