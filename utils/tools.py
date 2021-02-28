@@ -48,7 +48,7 @@ def arg_to_iter(arg):
 
 
 def gen_random_str(length):
-    return "".join(random.sample(string.ascii_lowercase + string.digits, length))
+    return "".join(random.sample(string.ascii_letters + string.digits, length))
 
 
 class LazyProperty:
