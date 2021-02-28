@@ -39,7 +39,7 @@ class CrawlFindGoods(AsyncSpider):
             "User-Agent": ua,
             "Content-Type": "application/json;charset=UTF-8",
             "Origin": "http://mobile.yangkeduo.com",
-            "Referer": "http://mobile.yangkeduo.com/sbxeghhl.html?_pdd_fs=1&_pdd_nc=ffffff&_pdd_tc=00ffffff&_pdd_sbs=1&refer_page_el_sn=1961510&refer_page_name=inde",
+            "Referer": "http://mobile.yangkeduo.com/sbxeghhl.html?_pdd_fs=1&_pdd_nc=ffffff&_pdd_tc=00ffffff&_pdd_sbs=1&refer_page_el_sn=1961510&refer_page_name=index",
             "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
             "Cookie": f"api_uid=CkmjnGATsRdMFQBWrnXTAg==; _nano_fp={nano_fp}; ua={quote(ua)}; webp=1",
         }
