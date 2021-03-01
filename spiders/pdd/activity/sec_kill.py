@@ -14,8 +14,7 @@ from utils.tools import gen_random_str
 
 class CrawlFindGoods(AsyncSpider):
     key = "pdd_spike_activate_goods_list"
-    # redis_env = "redis15"
-    # redis_db = 1
+    redis_env = "tendis"
     logger_name = "activity_sec_kill"
 
     async def make_headers(self, nano_fp):
@@ -51,7 +50,7 @@ class CrawlFindGoods(AsyncSpider):
             {"label": "内衣", "value": 37104},
         ]
         api_uid = "CkmjnGATsRdMFQBWrnXTAg=="
-        referer = "http://mobile.yangkeduo.com/sbxeghhl.html?_pdd_fs=1&_pdd_nc=ffffff&_pdd_tc=00ffffff&_pdd_sbs=1&refer_page_name=index"
+        referer = "https://mobile.yangkeduo.com/spike.html?__rp_name=spike_v3&_pdd_fs=1&_pdd_tc=ffffff&_pdd_sbs=1&_pdd_nc=d4291d&refer_page_el_sn=99956&refer_page_name=index"
         for page, cate_info in itertools.product(range(1, 31), cate_list):
             tab = cate_info["value"]
             nano_fp = await PddParamsProducer(self.session).get_nano_fp()
@@ -77,7 +76,7 @@ class CrawlFindGoods(AsyncSpider):
             if data:
                 if not res.get("errorMsg"):
                     # res["cache_time"] = int(time.time())
-                    print(res)
+                    return res
 
 
 if __name__ == "__main__":

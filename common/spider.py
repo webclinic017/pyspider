@@ -11,7 +11,7 @@ import async_timeout
 import ujson
 from aiohttp import ClientSession, TCPConnector
 from aioredis import Redis
-from config import AioRedis, KafkaClient, RedisClient
+from config import AioRedis, KafkaClient, RedisClient, TendisClient
 from utils.log import get_loguru_logger
 
 from common.request import aiorequest
@@ -47,6 +47,8 @@ class AsyncSpider(Settings):
         self.aioredis_client = None
         if self.redis_env in ("test", "redis15", "redis30"):
             self.redis_client = RedisClient(self.redis_env, self.redis_db)
+        elif self.redis_env == "tendis":
+            self.redis_client = TendisClient()
         elif self.redis_env in ("aio_test", "aio_redis15", "aio_redis30"):
             self.aioredis_client = AioRedis(self.redis_env, self.redis_db)
 
@@ -301,9 +303,9 @@ class AsyncSpider(Settings):
         return spider
 
     @classmethod
-    async def async_start(cls, loop=None):
+    async def async_start(cls, session=None, loop=None):
         loop = loop or asyncio.get_event_loop()
-        spider_ins = cls()
+        spider_ins = cls(session)
         await spider_ins._start()
 
         return spider_ins
