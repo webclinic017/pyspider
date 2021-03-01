@@ -34,6 +34,8 @@ else:
 class AsyncSpider(Settings):
     """异步通用爬虫"""
 
+    start_urls = []
+
     def __init__(self, session=None) -> None:
         self.session = session or ClientSession(connector=TCPConnector(ssl=False))
         self.sem = asyncio.Semaphore(self.concurrency)
@@ -254,7 +256,9 @@ class AsyncSpider(Settings):
         #     await self.request_queue.put(None)
 
     async def start_requests(self):
-        yield self.Request("https://pyhton.org")
+        if self.start_urls:
+            for url in self.start_urls:
+                yield self.Request(url, callback=self.parse)
 
     async def run(self):
         consumers = [
