@@ -1,5 +1,6 @@
 import itertools
 import sys
+import time
 from urllib.parse import quote
 
 if sys.platform == "win32":
@@ -51,7 +52,7 @@ class CrawlFindGoods(AsyncSpider):
         ]
         api_uid = "CkmjnGATsRdMFQBWrnXTAg=="
         referer = "https://mobile.yangkeduo.com/spike.html?__rp_name=spike_v3&_pdd_fs=1&_pdd_tc=ffffff&_pdd_sbs=1&_pdd_nc=d4291d&refer_page_el_sn=99956&refer_page_name=index"
-        for page, cate_info in itertools.product(range(1, 31), cate_list):
+        for page, cate_info in itertools.product(range(1, 51), cate_list):
             tab = cate_info["value"]
             nano_fp = await PddParamsProducer(self.session).get_nano_fp()
             headers = await self.make_headers(nano_fp)
@@ -81,3 +82,4 @@ class CrawlFindGoods(AsyncSpider):
 
 if __name__ == "__main__":
     CrawlFindGoods.start()
+    time.sleep(3 * 3600)

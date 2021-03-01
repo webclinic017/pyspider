@@ -52,6 +52,12 @@ def get_loguru_logger(name):
     log_file_path = os.path.join(log_path, file_name)
     formatter = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <6}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
     logger.add(log_file_path, level="ERROR", format=formatter, rotation="500 MB")
+    dir_list = [os.path.join(log_path, file) for file in os.listdir(log_path)]
+    for log in dir_list:
+        create_time = int(os.path.getctime(log))
+        if int(time.time()) - create_time >= 3600 * 24 * 3:
+            os.remove(log)
+
     return logger
 
 
