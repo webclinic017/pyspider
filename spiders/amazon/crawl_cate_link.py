@@ -5,7 +5,7 @@ import sys
 if sys.platform == "win32":
     path = "C:\\Users\\Ety\\Desktop\\pyspider"
 else:
-    path = "/data/spider/pyspider"
+    path = "/data/pyspider"
 sys.path.append(path)
 from common.spider import AsyncSpider
 from common.response import Response
