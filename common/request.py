@@ -69,6 +69,8 @@ class Request:
                     text = await resp.text()
         except aiohttp.ClientHttpProxyError as e:
             self.logger.error(f"代理出错：{repr(e)}")
+        except TimeoutError as e:
+            self.logger.error(f"请求超时：{repr(e)}")
         except Exception as e:
             self.logger.error(f"{repr(e)}==>请求{self.url}出错.")
         else:
