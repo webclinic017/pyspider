@@ -37,7 +37,9 @@ class AsyncSpider(Settings):
     start_urls = []
 
     def __init__(self, session=None) -> None:
-        self.session = session or ClientSession(connector=TCPConnector(ssl=False))
+        self.session = session or ClientSession(
+            connector=TCPConnector(ssl=False), trust_env=True
+        )
         self.sem = asyncio.Semaphore(self.concurrency)
         self.request_queue = asyncio.Queue()
         self.executor = ThreadPoolExecutor()
@@ -124,7 +126,7 @@ class AsyncSpider(Settings):
             headers = self.default_headers
         if "User-Agent" or "user-agent" not in headers:
             ua = await self.get_ua(ua_type=self.ua_type)
-            headers["User-Agent"] = ua
+            headers["user-agent"] = ua
         if self.retry_time <= 0:
             self.retry_time = 1
         for _ in range(self.retry_time):

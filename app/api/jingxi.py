@@ -1,6 +1,6 @@
 import ujson
 from aioredis import Redis
-from app.constants import JingXi
+from constants.redis_key import JingXi
 from app.deps import Depend
 from app.schemas.response import CommonResponse, EmptyResponse
 from app.src.jingxi.keyword_search import KeywordSearch
