@@ -13,6 +13,7 @@ from aiohttp import ClientSession, TCPConnector
 from aioredis import Redis
 from config import AioRedis, KafkaClient, RedisClient, TendisClient
 from utils.log import get_loguru_logger
+from utils.proxy import get_long_proxy
 
 from common.request import aiorequest
 from common.response import RequestBody, Response
@@ -84,9 +85,11 @@ class AsyncSpider(Settings):
             return self.default_ua[self.ua_type]
 
     async def get_proxy(self, proxy_type="pinzan"):
-        assert proxy_type in {"pinzan", "dubsix", "2808", "liebaoV1", ""}
+        assert proxy_type in {"pinzan", "dubsix", "2808", "liebaoV1", "long", ""}
         if not proxy_type:
             return ""
+        elif proxy_type == "long":
+            return get_long_proxy()
         url = "http://yproxy.91cyt.com/proxyHandler/getProxy/?platform={}&wantType=1".format(
             proxy_type
         )
