@@ -47,9 +47,11 @@ class CrawlCategory(AsyncSpider):
         bs = response.html_tree()
         a = bs.find_all("a", {"class": "a-link-normal fsdLink fsdDeptLink"})
         for cate in a:
-            cate_data["cate_name"] = cate.get_text().strip()
+            cate_name = cate.get_text().strip()
+            cate_data["cate_name"] = cate_name
             link = self.domain + cate.get("href").strip()
             self.redis_client.sadd(Amazon.CATE_LINK_SET, link)
+            self.redis_client.sadd(Amazon.KEYWORD_SEARCH_SET, cate_name)
             cate_data["link"] = link
             print(cate_data)
             yield response.follow(link, callback=self.parse_second_cate)
@@ -70,6 +72,8 @@ class CrawlCategory(AsyncSpider):
                 text = cate.get_text().strip()
                 link = self.domain + cate.get("href").strip()
                 self.redis_client.sadd(Amazon.CATE_LINK_SET, link)
+                if text:
+                    self.redis_client.sadd(Amazon.KEYWORD_SEARCH_SET, text)
                 print(f"{text}:{link}")
                 yield res.follow(link)
 
