@@ -18,14 +18,15 @@ class CrawlCategory(AsyncSpider):
     timeout = 10
     redis_env = "aio_redis30"
     redis_db = 3
+    concurrency = 10
 
     headers = {
         "authority": "www.amazon.com",
         "pragma": "no-cache",
         "cache-control": "no-cache",
-        "rtt": "700",
-        "downlink": "1.4",
-        "ect": "3g",
+        # "rtt": "700",
+        # "downlink": "1.4",
+        # "ect": "3g",
         "upgrade-insecure-requests": "1",
         # "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36",
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -54,7 +55,14 @@ class CrawlCategory(AsyncSpider):
             yield response.follow(link, callback=self.parse_second_cate)
 
     async def parse_second_cate(self, res: Response):
+        if "captchacharacters" in res.text:
+            print(f"出现验证码：{res.url}")
+            return
         bs = res.html_tree()
+        text = "查看所有的结果"
+        if text in res.text:
+            tag = bs.find(text=text).parent.parent
+            print(tag.get("href"))
         data = bs.find_all("a", {"class": "a-link-normal s-navigation-item"})
         if data:
             for cate in data:
