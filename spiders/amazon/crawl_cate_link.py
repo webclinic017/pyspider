@@ -16,12 +16,14 @@ class CrawlCategory(AsyncSpider):
     logger_name = "amazon_category"
     domain = "https://www.amazon.com"
     timeout = 10
-    redis_env = "redis30"
-    redis_db = 3
-    concurrency = 10
+    redis_env = "test"
+    redis_db = 0
+    concurrency = 3
     delay = random.uniform(1, 2)
+    proxy = "pinzan"
+    retry_time = 0
 
-    headers = {
+    default_headers = {
         "authority": "www.amazon.com",
         "pragma": "no-cache",
         "cache-control": "no-cache",
@@ -40,7 +42,7 @@ class CrawlCategory(AsyncSpider):
 
     async def start_requests(self):
         url = "https://www.amazon.com/-/zh/gp/site-directory?ref_=nav_em__fullstore_0_1_1_34"
-        yield self.Request(url, headers=self.headers, callback=self.parse)
+        yield self.Request(url, callback=self.parse)
 
     async def parse(self, response: Response):
         cate_data = {}
@@ -59,7 +61,7 @@ class CrawlCategory(AsyncSpider):
     async def parse_second_cate(self, res: Response):
         if "captchacharacters" in res.text:
             print(f"出现验证码：{res.url}")
-            return
+            return res.follow(res.url)
         bs = res.html_tree()
         text = "查看所有的结果"
         if text in res.text:

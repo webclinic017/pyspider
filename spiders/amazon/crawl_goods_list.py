@@ -41,7 +41,7 @@ class CrawlGoodsList(AsyncSpider):
     # ]
 
     async def start_requests(self):
-        for _ in range(100):
+        for _ in range(1000):
             url = self.redis_client.spop(Amazon.CATE_LINK_SET)
             yield self.Request(url, callback=self.parse)
 
@@ -71,6 +71,9 @@ class CrawlGoodsList(AsyncSpider):
                 item["goods_detail_link"] = self.domain + tag.find(
                     "a", {"class": "a-link-normal s-no-outline"}
                 ).get("href")
+                self.redis_client.sadd(
+                    Amazon.GOODS_DEATAIL_LINK_SET, item["goods_detail_link"]
+                )
             except:
                 item["goods_detail_link"] = ""
             try:
