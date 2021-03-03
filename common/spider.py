@@ -249,18 +249,27 @@ class AsyncSpider(Settings):
         task = asyncio.ensure_future(self.request(**request_body._asdict()))
         return task
 
-    async def request_producer(self):
-        async for request_body in self.start_requests():
-            task = None
-            if isinstance(request_body, RequestBody):
-                task = self.create_task(request_body)
-            elif isinstance(request_body, (dict, str)) or request_body is None:
-                task = request_body
+    async def put_task(self, request_body):
+        task = None
+        if isinstance(request_body, RequestBody):
+            task = self.create_task(request_body)
+        elif isinstance(request_body, (dict, str)) or request_body is None:
+            task = request_body
+        if task:
             await self.request_queue.put(task)
+
+    async def request_producer(self):
+        gen = self.start_requests()
+        if isasyncgen(gen):
+            async for request_body in gen:
+                await self.put_task(request_body)
+        elif isgenerator(gen):
+            for request_body in gen:
+                await self.put_task(request_body)
         # for _ in range(self.worker_numbers):
         #     await self.request_queue.put(None)
 
-    async def start_requests(self):
+    def start_requests(self):
         if self.start_urls:
             for url in self.start_urls:
                 yield self.Request(url, callback=self.parse)
