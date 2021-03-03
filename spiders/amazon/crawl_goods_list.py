@@ -41,8 +41,8 @@ class CrawlGoodsList(AsyncSpider):
     # ]
 
     async def start_requests(self):
-        for _ in range(1000):
-            url = self.redis_client.spop(Amazon.CATE_LINK_SET)
+        urls = self.redis_client.spop(Amazon.CATE_LINK_SET, count=1000)
+        for url in urls:
             yield self.Request(url, callback=self.parse)
 
     def parse(self, response: Response):
