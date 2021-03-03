@@ -48,7 +48,7 @@ class CrawlCategory(AsyncSpider):
         cate_data = {}
         bs = response.html_tree()
         a = bs.find_all("a", {"class": "a-link-normal fsdLink fsdDeptLink"})
-        for cate in a:
+        for cate in a[::-1]:
             cate_name = cate.get_text().strip()
             cate_data["cate_name"] = cate_name
             link = self.domain + cate.get("href").strip()
@@ -58,7 +58,7 @@ class CrawlCategory(AsyncSpider):
             print(cate_data)
             yield response.follow(link, callback=self.parse_second_cate)
 
-    async def parse_second_cate(self, res: Response):
+    def parse_second_cate(self, res: Response):
         if "captchacharacters" in res.text:
             print(f"出现验证码：{res.url}")
             return res.follow(res.url)
